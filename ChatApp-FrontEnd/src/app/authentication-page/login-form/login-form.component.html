@@ -1,0 +1,33 @@
+<div>
+  <form [formGroup]="loginForm">
+    <h1>Log in to continue!</h1>
+    @if(getSubmitted && loginForm.get('UserName')?.errors || getSubmitted &&
+    loginForm.get('Password')?.errors || getSubmitted && getErrorMessage) {
+    <p class="error-text">
+      {{
+        getErrorMessage
+          ? getErrorMessage
+          : "Please enter valid login and password!"
+      }}
+    </p>
+    }
+    <label for="login">Username</label>
+    <input
+      id="UserName"
+      type="text"
+      placeholder="Login..."
+      formControlName="UserName"
+    />
+    <label for="login">Password</label>
+    <input
+      id="Password"
+      type="password"
+      placeholder="Password..."
+      formControlName="Password"
+    />
+    <span>
+      <button type="button" (click)="onSubmit()">Log in</button>
+      <button type="button" (click)="onRoute()">Register</button>
+    </span>
+  </form>
+</div>

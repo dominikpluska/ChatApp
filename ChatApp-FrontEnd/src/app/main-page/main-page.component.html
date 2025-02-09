@@ -1,0 +1,9 @@
+<div class="w-full h-full">
+  <app-navbar-component />
+  <div class="h-full grid grid-cols-6">
+    <app-sidebar-component class="col-span-1" (select)="onSelect($event)" />
+    <div class="col-span-5 h-screen">
+      <router-outlet />
+    </div>
+  </div>
+</div>

@@ -1,0 +1,7 @@
+nav {
+  @apply w-full h-10 bg-slate-800 absolute z-10 flex justify-end;
+}
+
+button {
+  @apply bg-slate-800 text-neutral-50 py-3 flex justify-center mr-5 px-5 hover:bg-slate-700;
+}

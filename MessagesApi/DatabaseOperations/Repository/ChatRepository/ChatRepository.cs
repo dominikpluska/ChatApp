@@ -1,0 +1,146 @@
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using MessagesApi.Data;
+using MessagesApi.Dto;
+using MessagesApi.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
+using System;
+using System.Text.Json;
+
+namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
+{
+    public class ChatRepository : IChatRepository
+    {
+        private readonly MongoDBService _mongoDBService;
+
+        public ChatRepository(MongoDBService mongoDBService)
+        {
+
+            _mongoDBService = mongoDBService;
+        }
+
+        public async Task<ObjectId> CheckChat(ObjectId chatId)
+        {
+            try
+            {
+                var filter = Builders<Chat>.Filter.Eq(x => x.ChatId, chatId);
+                var projection = Builders<Chat>.Projection
+                    .Include(x => x.ChatId)
+                    .Exclude(x => x.Messages)
+                    .Exclude(x => x.ChatParticipants);
+
+                var result = await _mongoDBService.ChatCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
+
+                var selectedId = result.GetValue("_id");
+                var deserializedResult = BsonSerializer.Deserialize<ObjectId>(selectedId.ToJson());
+
+                return deserializedResult;
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ArgumentException("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<IEnumerable<ChatParticipant>> GetChatParticipants(ObjectId chatId)
+        {
+            try
+            {
+                var filter = Builders<Chat>.Filter.Eq(x => x.ChatId, chatId);
+                var projection = Builders<Chat>.Projection
+                    .Include(x => x.ChatParticipants)
+                    .Include(x => x.Messages)
+                    .Exclude(x => x.ChatId);
+
+
+                var results = await _mongoDBService.ChatCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
+                var chatParticipantsBson = results.GetValue("ChatParticipants").AsBsonArray;
+
+                var deserializedResults = chatParticipantsBson.Select(x => BsonSerializer.Deserialize<ChatParticipant>(x.AsBsonDocument)).ToList(); 
+                return deserializedResults;
+            }
+            catch(ArgumentNullException ex)
+            {
+                throw new ArgumentException("Argument Null Exception!", ex.Message);
+            }
+            catch(OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        } 
+
+        public async Task<IEnumerable<Message>> GetChatMessages(ObjectId chatId)
+        {
+
+            var pipeline = new[]
+            {
+                new BsonDocument("$match", new BsonDocument("_id", chatId)),
+                new BsonDocument("$unwind", "$Messages"),
+                new BsonDocument("$sort", new BsonDocument("Messages.PostedDate", -1)),
+                new BsonDocument("$limit", 10),
+                new BsonDocument("$project", new BsonDocument
+                {
+                    { "_id", 0 },    
+                    { "Messages", 1 } 
+                })
+            };
+
+            var results = await _mongoDBService.ChatCollectionBson.Aggregate<BsonDocument>(pipeline).ToListAsync();
+
+            var deserializedResults = results
+                .Select(result => BsonSerializer.Deserialize<Message>(result["Messages"].AsBsonDocument)) 
+                .ToList();
+
+            return deserializedResults!;
+        }
+
+        public async Task<Message> GetChatMessage(ObjectId chatId, ObjectId messageId)
+        {
+            try
+            {
+                var filter = Builders<BsonDocument>.Filter.Eq("_id", chatId);
+                             //Builders<BsonDocument>.Filter.Eq("Messages._id", messageId);
+
+                var projection = Builders<BsonDocument>.Projection
+                                .ElemMatch<BsonDocument>("Messages", Builders<BsonDocument>.Filter.Eq("Messages._id", messageId));
+
+                var results = await _mongoDBService.ChatCollectionBson.Find(filter).FirstOrDefaultAsync();
+                var messagesBson = results.GetValue("Messages").AsBsonArray;
+
+                var deserializedResults = messagesBson.Select(x => BsonSerializer.Deserialize<Message>(x.AsBsonDocument)).FirstOrDefault();
+
+                return deserializedResults!;
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ArgumentException("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+
+    }
+}

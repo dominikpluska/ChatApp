@@ -1,0 +1,28 @@
+﻿using Microsoft.EntityFrameworkCore;
+using UserSettingsApi.Models;
+
+namespace UserSettingsApi.Data
+{
+    public class ApplicationDbContext : DbContext
+    {
+        private readonly IConfiguration _configuration;
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration configuration) : base(options)
+        {
+            _configuration = configuration;
+        }
+        public DbSet<FriendsList> FriendsLists { get; set; }
+        public DbSet<BlackList> BlackLists { get; set; }
+        public DbSet<Chats> Chats { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<FriendsList>();
+            modelBuilder.Entity<BlackList>();
+            modelBuilder.Entity<Chats>();
+
+        }
+
+    }
+}

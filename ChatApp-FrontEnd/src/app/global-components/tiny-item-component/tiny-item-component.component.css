@@ -1,0 +1,13 @@
+.container {
+  @apply mt-2 ml-20 w-11/12;
+}
+.sub-container {
+  @apply flex justify-between;
+}
+span {
+  @apply flex;
+}
+hr {
+  border-color: #7886c7;
+  @apply h-px my-2 border-2 rounded-md;
+}

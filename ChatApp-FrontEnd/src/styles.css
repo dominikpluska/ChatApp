@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.main-font {
+  font-family: "Open Sans", serif;
+  font-optical-sizing: auto;
+  font-weight: 100;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
+body {
+  @apply font-medium text-white w-full h-screen;
+}
+
+.main-background {
+  @apply bg-gray-600;
+}
+
+input {
+  border-color: #7886c7;
+  @apply rounded-sm border-4 bg-slate-500;
+}
+
+input:focus {
+  outline: none;
+  border: 3px solid #414a72;
+}
+
+textarea {
+  border-color: #7886c7;
+  @apply rounded-md border-4 resize-none bg-slate-500 px-12 py-2;
+}
+
+textarea:focus {
+  outline: none;
+  border: 4px solid #414a72;
+}
+
+form {
+  border-color: #7886c7;
+  @apply bg-gray-500 rounded-2xl border-4 flex items-center justify-center flex-col;
+}
+
+button {
+  background-color: #7886c7;
+  @apply text-neutral-50 rounded;
+}
+
+button:hover {
+  background-color: #414a72;
+}
+
+.error-text {
+  @apply text-red-900;
+}

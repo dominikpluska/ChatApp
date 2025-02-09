@@ -1,0 +1,16 @@
+div {
+  background-color: #2f344d;
+  @apply w-full h-full text-center pt-4 flex flex-col z-20 relative;
+}
+button {
+  background-color: #2f344d;
+  @apply text-neutral-50 py-3 flex justify-center;
+}
+
+button:hover {
+  background-color: #23273b;
+}
+
+i {
+  @apply pr-1;
+}
