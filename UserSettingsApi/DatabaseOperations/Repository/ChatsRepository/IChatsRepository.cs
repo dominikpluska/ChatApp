@@ -4,6 +4,6 @@ namespace UserSettingsApi.DatabaseOperations.Repository.ChatsRepository
 {
     public interface IChatsRepository
     {
-        public Task<Chats> GetChatList(string userId);
+        public Task<Chat> GetChatList(string userId);
     }
 }

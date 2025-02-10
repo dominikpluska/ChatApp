@@ -6,6 +6,7 @@ using AuthApi.DataBaseOperations.Repository.UserAccountsRepository;
 using AuthApi.Jwt;
 using AuthApi.Managers.AdminManager;
 using AuthApi.Managers.UserManager;
+using AuthApi.Services;
 using AuthApi.UserAccessor;
 
 namespace AuthApi
@@ -25,7 +26,7 @@ namespace AuthApi
             builder.Services.AddScoped<IJwt, AuthApi.Jwt.Jwt>();
             builder.Services.AddScoped<IUserManager, UserManager>();
             builder.Services.AddScoped<IAdminManager, AdminManager>();
-
+            builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
             return builder;
         }
     }

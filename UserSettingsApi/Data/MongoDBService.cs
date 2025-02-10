@@ -11,7 +11,7 @@ namespace UserSettingsApi.Data
 
         public IMongoCollection<FriendsList> FriendsListCollection { get; init; }
         public IMongoCollection<BsonDocument> FriendsListCollectionBson { get; init; }
-        public IMongoCollection<Chats> ChatsCollection { get; init; }
+        public IMongoCollection<Chat> ChatsCollection { get; init; }
         public IMongoCollection<BsonDocument> LastsChatsCollectionBson { get; init; }
         public IMongoCollection<BlackList> BlackListsCollection { get; init; }
         public IMongoCollection<BsonDocument> BlackListsCollectionBson { get; init; }
@@ -26,7 +26,7 @@ namespace UserSettingsApi.Data
 
             FriendsListCollection = database.GetCollection<FriendsList>(mongoCollections[0]);
             FriendsListCollectionBson = database.GetCollection<BsonDocument>(mongoCollections[0]);
-            ChatsCollection = database.GetCollection<Chats>(mongoCollections[1]);
+            ChatsCollection = database.GetCollection<Chat>(mongoCollections[1]);
             LastsChatsCollectionBson = database.GetCollection<BsonDocument>(mongoCollections[1]);
             BlackListsCollection = database.GetCollection<BlackList>(mongoCollections[2]);
             BlackListsCollectionBson = database.GetCollection<BsonDocument>(mongoCollections[2]);

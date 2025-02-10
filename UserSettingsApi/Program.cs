@@ -71,7 +71,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 });
 
 
-Build.AddServices(builder);
+builder.AddServices();
 var app = builder.Build();
 
 using var scope = app.Services.CreateScope();

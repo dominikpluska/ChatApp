@@ -31,12 +31,12 @@ namespace MessagesApi.Managers.ChatManager
             try
             {
                 ArgumentNullException.ThrowIfNull(chatRequestDto);
+                var userId = _userAccessor.UserId;
+                var userProperties = await _authenticationService.GetAccountProperties(userId);
 
-                var requestInitialized = await _authenticationService.GetAccountProperties(chatRequestDto!.RequestInitializer);
-
-                if (requestInitialized.IsActive == false || requestInitialized == null)
+                if (userProperties == null || !userProperties.IsActive)
                 {
-                    return Results.Problem("Account either does not exist or is inactive!");
+                    return Results.Problem("User does not exist or is inactive!");
                 }
 
                 foreach (var user in chatRequestDto.RequestRecipient)
@@ -53,7 +53,7 @@ namespace MessagesApi.Managers.ChatManager
                 {
                     new ChatParticipant()
                     {
-                        UserId = requestInitialized.UserAccountId,
+                        UserId = userProperties.UserAccountId,
                         IsAccepted = true,
                     }
                 };
@@ -99,8 +99,7 @@ namespace MessagesApi.Managers.ChatManager
             try
             {
                 ArgumentNullException.ThrowIfNull(acceptChatRequestDto);
-                //var userId = _userAccessor.UserId;
-                var userId = "7696f54b-1f17-45a8-8a21-69fdf4b0d9e1";
+                var userId = _userAccessor.UserId;
                 var userProperties = await _authenticationService.GetAccountProperties(userId);
 
 
@@ -148,8 +147,7 @@ namespace MessagesApi.Managers.ChatManager
             {
                 ArgumentNullException.ThrowIfNull(messageDto);
 
-                //var userId = _userAccessor.UserId;
-                var userId = "7696f54b-1f17-45a8-8a21-69fdf4b0d9e1";
+                var userId = _userAccessor.UserId;
                 var userProperties = await _authenticationService.GetAccountProperties(userId);
 
                 if (userProperties == null || !userProperties.IsActive)
@@ -193,8 +191,7 @@ namespace MessagesApi.Managers.ChatManager
                 ArgumentNullException.ThrowIfNull(chatId);
                 var chatIdParsed = ObjectId.Parse(chatId);
 
-                //var userId = _userAccessor.UserId;
-                var userId = "7696f54b-1f17-45a8-8a21-69fdf4b0d9e1";
+                var userId = _userAccessor.UserId;
                 var userProperties = await _authenticationService.GetAccountProperties(userId);
 
                 if (userProperties == null || !userProperties.IsActive)
@@ -234,11 +231,7 @@ namespace MessagesApi.Managers.ChatManager
                 var chatIdParsed = ObjectId.Parse(chatId);
                 var messageIdParsed = ObjectId.Parse(messageId);
 
-                //Check if chat exists
-                //Check if user is allowed to view chat
-
-                //var userId = _userAccessor.UserId;
-                var userId = "7696f54b-1f17-45a8-8a21-69fdf4b0d9e1";
+                var userId = _userAccessor.UserId;
                 var userProperties = await _authenticationService.GetAccountProperties(userId);
 
                 if (userProperties == null || !userProperties.IsActive)
@@ -273,8 +266,7 @@ namespace MessagesApi.Managers.ChatManager
         {
             try
             {
-                //var userId = _userAccessor.UserId;
-                var userId = "7696f54b-1f17-45a8-8a21-69fdf4b0d9e1";
+                var userId = _userAccessor.UserId;
                 var userProperties = await _authenticationService.GetAccountProperties(userId);
 
                 if (userProperties == null || !userProperties.IsActive)

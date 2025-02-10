@@ -3,11 +3,11 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace UserSettingsApi.Models
 {
-    public class Chats
+    public class Chat
     {
         [BsonId]
-        public ObjectId LastsChatsId { get; set; }
+        public ObjectId ChatsId { get; set; }
         public required string UserId { get; set; }
-        public required List<string> ChatList { get; set; }
+        public List<string>? ChatList { get; set; }
     }
 }

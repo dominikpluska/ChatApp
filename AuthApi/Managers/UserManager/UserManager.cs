@@ -6,6 +6,7 @@ using AuthApi.Dto;
 using AuthApi.Helper;
 using AuthApi.Jwt;
 using AuthApi.Models;
+using AuthApi.Services;
 using AuthApi.UserAccessor;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -23,11 +24,11 @@ namespace AuthApi.Managers.UserManager
         private readonly ICookieGenerator _cookieGenerator;
         private readonly IUserAccessor _userAccessor;
         private readonly IMapper _mapper;
-        private readonly DateTime _expiryTime = DateTime.Now.AddHours(2);
+        private readonly IUserSettingsService _userSettingsService;
         private readonly int _passwordLength = 8;
 
         public UserManager(IUserAccountsRepository userAccountsRepository, IUserAccountsCommands userAccountsCommands, IJwt jwt, ICookieGenerator cookieGenerator,
-            IRoleRepository roleRepository, IUserAccessor userAccessor, IMapper mapper)
+            IRoleRepository roleRepository, IUserAccessor userAccessor, IMapper mapper, IUserSettingsService userSettingsService)
         {
             _userAccountsRepository = userAccountsRepository;
             _userAccountsCommands = userAccountsCommands;
@@ -36,6 +37,7 @@ namespace AuthApi.Managers.UserManager
             _cookieGenerator = cookieGenerator;
             _userAccessor = userAccessor;
             _mapper = mapper;
+            _userSettingsService = userSettingsService;
         }
 
         public async Task<IResult> RegisterNewUser(UserRegistrationDto userDto)
@@ -87,6 +89,12 @@ namespace AuthApi.Managers.UserManager
 
                 await _userAccountsCommands.AddNewUser(userRegistration);
 
+                var userFromDb = await _userAccountsRepository.GetUserByName(userDto.UserName);
+
+                //Fix this method!
+                //If any error occurs in the line below, drop username from db
+                await _userSettingsService.CreateUserSettings(userFromDb.UserAccountId);
+
                 return Results.Ok("User has been registered!");
             }
             catch (Exception ex)
@@ -116,7 +124,7 @@ namespace AuthApi.Managers.UserManager
                     }
                     else
                     {
-                        var cookie = _cookieGenerator.GenerateCookie(_expiryTime);
+                        var cookie = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(2));
                         _userAccessor.SetCookie("ChatApp", _jwt.GenerateToken(userFromDb.UserName, userFromDb.RoleId), cookie);
                         _userAccessor.SetCookie("ChatAppUserId", userFromDb.UserAccountId, cookie);
                         return Results.Ok("Login successful");
