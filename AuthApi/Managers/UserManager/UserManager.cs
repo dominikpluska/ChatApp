@@ -87,13 +87,13 @@ namespace AuthApi.Managers.UserManager
                     ProfilePicturePath = "",
                 };
 
-                await _userAccountsCommands.AddNewUser(userRegistration);
+                var userAccountId = await _userAccountsCommands.AddNewUser(userRegistration);
 
-                var userFromDb = await _userAccountsRepository.GetUserByName(userDto.UserName);
+                //var userFromDb = await _userAccountsRepository.GetUserByName(userDto.UserName);
 
-                //Fix this method!
                 //If any error occurs in the line below, drop username from db
-                await _userSettingsService.CreateUserSettings(userFromDb.UserAccountId);
+
+                await _userSettingsService.CreateUserSettings(userAccountId);
 
                 return Results.Ok("User has been registered!");
             }
@@ -104,7 +104,6 @@ namespace AuthApi.Managers.UserManager
 
         }
 
-        //Change role cookie
         public async Task<IResult> Login(UserLoginDto userLoginDto)
         {
             try
@@ -295,6 +294,12 @@ namespace AuthApi.Managers.UserManager
             {
                 return Results.Problem(ex.Message);
             }
+        }
+
+        //To be finished later on
+        public async Task<IResult> LogOut()
+        {
+            return Results.Ok();
         }
     }
 }

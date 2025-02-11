@@ -6,7 +6,9 @@ using System.Text;
 using UserSettingsApi;
 using UserSettingsApi.Data;
 using UserSettingsApi.DatabaseOperations.Repository.ChatsRepository;
+using UserSettingsApi.Managers.BlackListsManager;
 using UserSettingsApi.Managers.ChatsManager;
+using UserSettingsApi.Managers.FriendsListsManager;
 using UserSettingsApi.UserAccessor;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -62,7 +64,9 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
+
 builder.Services.AddOpenApi();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseMongoDB
@@ -72,12 +76,27 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 
 builder.AddServices();
+
 var app = builder.Build();
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+
+app.UseHttpsRedirection();
 
 using var scope = app.Services.CreateScope();
 var chatsManager = scope.ServiceProvider.GetRequiredService<IChatsManager>();
+var blackListsManager = scope.ServiceProvider.GetRequiredService<IBlackListsManager>(); 
+var friendsListsManager = scope.ServiceProvider.GetRequiredService<IFriendsListsManager>();
 
-app.MapChatsEndpoints(chatsManager);
+app.MapChatsEndpoints(chatsManager)
+    .MapBlackListsEndpoints(blackListsManager)
+    .MapFriendsListEndpoints(friendsListsManager);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

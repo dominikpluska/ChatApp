@@ -12,14 +12,12 @@ namespace MessagesApi.Services
         private readonly IUserAccessor _userAccessor;
         private readonly IConfiguration _configuration;
         private readonly string _authApi;
-        private readonly string _messagesApi;
         public AuthenticationService(IHttpClientFactory httpClientFactory, IUserAccessor userAccessor, IConfiguration configuration)
         {
             _userAccessor = userAccessor;
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
             _authApi = _configuration.GetValue<string>("Apis:AuthApi")!;
-            _messagesApi = _configuration.GetValue<string>("Apis:MessagesApi")!;
         }
 
         public async Task Authorize(HttpContext httpContext)

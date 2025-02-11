@@ -10,15 +10,19 @@ namespace UserSettingsApi.Services
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IUserAccessor _userAccessor;
-        public AuthenticationService(IHttpClientFactory httpClientFactory, IUserAccessor userAccessor)
+        private readonly IConfiguration _configuration;
+        private readonly string _authApi;
+        public AuthenticationService(IHttpClientFactory httpClientFactory, IUserAccessor userAccessor, IConfiguration configuration)
         {
             _userAccessor = userAccessor;
             _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
+            _authApi = _configuration.GetValue<string>("Apis:AuthApi")!;
         }
 
         public async Task Authorize(HttpContext httpContext)
         {
-            var result = await ApiOperation(httpContext, "/AuthCheck");
+            var result = await ApiOperation(httpContext, $"{_authApi}/AuthCheck");
         }
 
         public async Task<string> GetUser(string userName)
@@ -27,7 +31,7 @@ namespace UserSettingsApi.Services
             {
                 throw new ArgumentNullException("UserName was null!");
             }
-            var result = await ApiOperation(userName!, $"/GetUser?userName={userName}");
+            var result = await ApiOperation(userName!, $"{_authApi}/GetUser?userName={userName}");
             return result.ToString()!;
         }
 
@@ -37,9 +41,11 @@ namespace UserSettingsApi.Services
             {
                 throw new ArgumentNullException("UserId was null!");
             }
-            var result = await ApiOperation(userId!, $"/GetUser?userId={userId}");
+            var result = await ApiOperation(userId!, $"{_authApi}/GetAccountProperties?userId={userId}");
 
-            return (UserAccountDto)result;
+            var userAccountDto = JsonSerializer.Deserialize<UserAccountDto>(result.ToString()!);
+
+            return userAccountDto!;
         }
 
         private async Task<object> ApiOperation(object data, string apiPath)

@@ -12,5 +12,6 @@ button:hover {
 }
 
 i {
+  color: #7886c7;
   @apply pr-1;
 }

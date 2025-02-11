@@ -8,5 +8,6 @@ import { Component, input } from '@angular/core';
   styleUrl: './tiny-item-component.component.css',
 })
 export class TinyItemComponentComponent {
-  item = input.required<string>();
+  componentId = input.required<string>();
+  name = input.required<string>();
 }

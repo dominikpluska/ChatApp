@@ -17,15 +17,15 @@ namespace AuthApi.DataBaseOperations.Commands.UserAccountsCommands
             _mapper = mapper;
         }
 
-        public async Task<IResult> AddNewUser(UserRegistration userRegistration)
+        public async Task<string> AddNewUser(UserRegistration userRegistration)
         {
             try
             {
                 var user = _mapper.Map<UserAccount>(userRegistration);
-                await _context.UserAccounts.AddAsync(user);
+                var userFromDb = await _context.UserAccounts.AddAsync(user);
                 await _context.SaveChangesAsync();
 
-                return Results.Ok(userRegistration.UserName);
+                return userFromDb.Entity.UserAccountId;
             }
             catch (Exception ex)
             {

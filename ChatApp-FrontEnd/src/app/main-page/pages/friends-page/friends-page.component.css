@@ -1,3 +1,8 @@
 div {
   @apply mt-24 h-5/6 mr-8 overflow-auto;
 }
+
+p {
+  color: #7886c7;
+  @apply ml-10 text-2xl font-bold pb-4;
+}

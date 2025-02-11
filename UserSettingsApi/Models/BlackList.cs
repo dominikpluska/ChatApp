@@ -8,6 +8,6 @@ namespace UserSettingsApi.Models
         [BsonId]
         public ObjectId BlackListId { get; set; }
         public required string UserAccountId { get; set; }
-        public required List<Friend> BlockedAccounts { get; set; }
+        public List<string> BlockedAccounts { get; set; }
     }
 }

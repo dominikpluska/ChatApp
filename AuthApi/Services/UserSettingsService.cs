@@ -26,25 +26,30 @@ namespace AuthApi.Services
         public async Task<IResult> CreateUserSettings(string userId)
         {
             ArgumentNullException.ThrowIfNull(userId);
-            var result = await ApiOperationPost(userId!, $"{_userSettingsApi}/CreateChatsTable");
+
+            UserSettings userSettings = new() { UserId = userId };
+
+            await ApiOperationPost(userSettings!, $"{_userSettingsApi}/CreateChatsTable");
+            await ApiOperationPost(userSettings!, $"{_userSettingsApi}/CreateBlackListTable");
+            await ApiOperationPost(userSettings!, $"{_userSettingsApi}/CreateFriendsListTable");
 
             return Results.Ok("Operation successful");
         }
 
-        private async Task<object> ApiOperationPost(string userId, string apiPath)
+        private async Task<object> ApiOperationPost(object userSettings, string apiPath)
         {
             
-            UserSettings userSettings = new UserSettings()
-            {
-                UserId = userId 
-            };
+            //UserSettings userSettings = new UserSettings()
+            //{
+            //    UserId = userId 
+            //};
             var jsonContent = JsonSerializer.Serialize(userSettings);
-            //var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            var client = _httpClientFactory.CreateClient("MessagesApi");
+            var client = _httpClientFactory.CreateClient("UserSettings");
             //client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _userAccessor.TokenString);
 
-            var response = await client.PostAsJsonAsync<string>(apiPath, jsonContent);
+            var response = await client.PostAsync(apiPath, content);
             response.EnsureSuccessStatusCode();
 
             var apiContent = await response.Content.ReadAsStringAsync();
