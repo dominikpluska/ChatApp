@@ -1,4 +1,4 @@
 div {
   border-color: #7886c7;
-  @apply mt-24 ml-10 border-4 w-5/6 h-4/6 rounded-md bg-slate-500 overflow-auto;
+  @apply mt-24 pb-12 ml-10 border-4 w-5/6 h-4/6 rounded-md bg-slate-500 overflow-auto;
 }

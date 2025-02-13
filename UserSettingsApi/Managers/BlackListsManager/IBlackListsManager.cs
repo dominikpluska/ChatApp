@@ -4,6 +4,6 @@ namespace UserSettingsApi.Managers.BlackListsManager
 {
     public interface IBlackListsManager
     {
-        public Task<IResult> CreateBlackListTable(UserSettingsDto userSettingsDto);
+        public Task<IResult> CreateBlackListTable(string userId);
     }
 }

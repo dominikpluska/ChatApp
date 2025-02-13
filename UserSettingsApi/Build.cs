@@ -1,8 +1,10 @@
 ﻿using UserSettingsApi.Data;
 using UserSettingsApi.DatabaseOperations.Commands.BlackListCommands;
 using UserSettingsApi.DatabaseOperations.Commands.ChatsCommands;
+using UserSettingsApi.DatabaseOperations.Commands.FriendRequestCommands;
 using UserSettingsApi.DatabaseOperations.Commands.FriendsLisiCommands;
 using UserSettingsApi.DatabaseOperations.Repository.ChatsRepository;
+using UserSettingsApi.DatabaseOperations.Repository.FriendRequestsRepository;
 using UserSettingsApi.DatabaseOperations.Repository.FriendsListRepository;
 using UserSettingsApi.Managers.BlackListsManager;
 using UserSettingsApi.Managers.ChatsManager;
@@ -24,15 +26,17 @@ namespace UserSettingsApi
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             builder.Services.AddScoped<IChatsManager, ChatsManager>();
-            builder.Services.AddScoped<IFriendsListsManager, FriendsListsManager>();
+            builder.Services.AddScoped<IFriendManager, FriendManager>();
             builder.Services.AddScoped<IBlackListsManager, BlackListsManager>();
 
             builder.Services.AddScoped<IChatsRepository, ChatsRepository>();
             builder.Services.AddScoped<IFriendsListRepository, FriendsListRepository>();
+            builder.Services.AddScoped<IFriendRequestsRepository, FriendRequestsRepository>();
 
             builder.Services.AddScoped<IChatsCommands, ChatsCommands>();
             builder.Services.AddScoped<IFriendListCommands, FriendListCommands>();
             builder.Services.AddScoped<IBlackListCommands, BlackListCommands>();
+            builder.Services.AddScoped<IFriendRequestCommands, FriendRequestCommands>();
             
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IUserAccessor, HttpUserAccessor>();

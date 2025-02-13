@@ -92,11 +92,11 @@ app.UseHttpsRedirection();
 using var scope = app.Services.CreateScope();
 var chatsManager = scope.ServiceProvider.GetRequiredService<IChatsManager>();
 var blackListsManager = scope.ServiceProvider.GetRequiredService<IBlackListsManager>(); 
-var friendsListsManager = scope.ServiceProvider.GetRequiredService<IFriendsListsManager>();
+var friendsListsManager = scope.ServiceProvider.GetRequiredService<IFriendManager>();
 
 app.MapChatsEndpoints(chatsManager)
     .MapBlackListsEndpoints(blackListsManager)
-    .MapFriendsListEndpoints(friendsListsManager);
+    .MapFriendsManagerEndpoints(friendsListsManager);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

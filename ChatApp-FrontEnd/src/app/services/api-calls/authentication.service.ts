@@ -21,6 +21,15 @@ export class AuthenticationService {
     );
   }
 
+  logout() {
+    return this.htppClient.post(`${authApi}Logout`, null).pipe(
+      catchError((error) => {
+        const errorMessage = error.error.detail;
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
+
   register(reigster: FormGroup<Register>) {
     return this.htppClient.post(`${authApi}Register`, reigster.value).pipe(
       catchError((error) => {

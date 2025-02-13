@@ -10,21 +10,22 @@ namespace UserSettingsApi
         public static WebApplication MapChatsEndpoints(this WebApplication app, IChatsManager chatsManager)
         {
             app.MapGet("/GetAllChats", async () => await chatsManager.GetAllChats());
-            app.MapPost("/CreateChatsTable", async (UserSettingsDto userSettingsDto) => await chatsManager.CreateChatsTable(userSettingsDto));
+            app.MapPost("/CreateChatsTable/{userId}", async (string userId) => await chatsManager.CreateChatsTable(userId));
             return app;
         }
 
         public static WebApplication MapBlackListsEndpoints(this WebApplication app, IBlackListsManager blackListsManager)
         {
-            app.MapPost("/CreateBlackListTable", async (UserSettingsDto userSettingsDto) => await blackListsManager.CreateBlackListTable(userSettingsDto));
+            app.MapPost("/CreateBlackListTable/{userId}", async (string userId) => await blackListsManager.CreateBlackListTable(userId));
             return app;
         }
 
-        public static WebApplication MapFriendsListEndpoints(this WebApplication app, IFriendsListsManager friendsListsManager)
+        public static WebApplication MapFriendsManagerEndpoints(this WebApplication app, IFriendManager friendManager)
         {
-            app.MapGet("/GetAllFriends", async () => await friendsListsManager.GetFriendsList());
-            app.MapPost("/CreateFriendsListTable", async (UserSettingsDto userSettingsDto) => await friendsListsManager.CreateFriendsListTable(userSettingsDto));
-            app.MapPut("/AddNewFriend", async (UserSettingsDto userSettingsDto) => await friendsListsManager.AddNewFriend(userSettingsDto));
+            app.MapGet("/GetAllFriends", async () => await friendManager.GetFriendsList());
+            app.MapPost("/SentFriendRequest/{userId}", async (string userId) => await friendManager.SendFriendRequests(userId));
+            app.MapPost("/CreateFriendsListTable/{userId}", async (string userId) => await friendManager.CreateFriendsListTable(userId));
+            app.MapPut("/AcceptFriendRequest/{requestId}", async (string requestId) => await friendManager.AcceptFriendRequest(requestId));
             return app;
         }
     }

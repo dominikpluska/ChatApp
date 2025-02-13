@@ -27,16 +27,14 @@ namespace AuthApi.Services
         {
             ArgumentNullException.ThrowIfNull(userId);
 
-            UserSettings userSettings = new() { UserId = userId };
-
-            await ApiOperationPost(userSettings!, $"{_userSettingsApi}/CreateChatsTable");
-            await ApiOperationPost(userSettings!, $"{_userSettingsApi}/CreateBlackListTable");
-            await ApiOperationPost(userSettings!, $"{_userSettingsApi}/CreateFriendsListTable");
+            await ApiOperationPost($"{_userSettingsApi}/CreateChatsTable/{userId}");
+            await ApiOperationPost($"{_userSettingsApi}/CreateBlackListTable/{userId}");
+            await ApiOperationPost($"{_userSettingsApi}/CreateFriendsListTable/{userId}");
 
             return Results.Ok("Operation successful");
         }
 
-        private async Task<object> ApiOperationPost(object userSettings, string apiPath)
+        private async Task<object> ApiOperationPost(string apiPath, object userSettings = null)
         {
             
             //UserSettings userSettings = new UserSettings()

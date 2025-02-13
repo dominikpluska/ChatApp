@@ -16,13 +16,13 @@ namespace UserSettingsApi.Managers.BlackListsManager
             _blackListCommands = blackListCommands;
         }
 
-        public async Task<IResult> CreateBlackListTable(UserSettingsDto userSettingsDto)
+        public async Task<IResult> CreateBlackListTable(string userId)
         {
             try
             {
                 BlackList blackList = new()
                 {
-                    UserAccountId = userSettingsDto.UserId
+                    UserAccountId = userId
                 };
                 await _blackListCommands.CreateBlackList(blackList);
 

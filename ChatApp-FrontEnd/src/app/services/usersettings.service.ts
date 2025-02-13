@@ -11,6 +11,8 @@ export class UserSettings {
 
   private friendsList?: Friend[] | null;
 
+  private chatsList?: string[] | null;
+
   constructor() {
     //constructor
   }
@@ -30,5 +32,13 @@ export class UserSettings {
 
   set setFriendsList(friends: Friend[]) {
     this.friendsList = friends;
+  }
+
+  get getChatsList() {
+    return this.chatsList;
+  }
+
+  set setChatsList(chats: string[]) {
+    this.chatsList = chats;
   }
 }

@@ -5,6 +5,7 @@ import { MainPageComponent } from './main-page/main-page.component';
 import { AuthGuard } from './services/authguard.service';
 import { ChatPageComponent } from './main-page/pages/chat-page/chat-page.component';
 import { FriendsPageComponent } from './main-page/pages/friends-page/friends-page.component';
+import { ChatsPageComponent } from './main-page/pages/chats-page/chats-page.component';
 
 export const routes: Routes = [
   {
@@ -18,7 +19,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'chats',
-        component: ChatPageComponent,
+        component: ChatsPageComponent,
       },
       {
         path: 'friends',

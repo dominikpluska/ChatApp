@@ -296,10 +296,24 @@ namespace AuthApi.Managers.UserManager
             }
         }
 
-        //To be finished later on
         public async Task<IResult> LogOut()
         {
-            return Results.Ok();
+            try
+            {
+                await Task.Run(() => 
+                {
+                    var cookieOptions = _cookieGenerator.GenerateCookie(DateTime.Now.AddDays(-1));
+                    _userAccessor.SetCookie("ChatApp", "", cookieOptions);
+                    _userAccessor.SetCookie("ChatAppUserId", "", cookieOptions);
+                    _userAccessor.SetCookie("ChatAppUserName", "", cookieOptions);
+                    
+                });
+                return Results.Ok("Logged out!");
+            }
+            catch(Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
         }
     }
 }

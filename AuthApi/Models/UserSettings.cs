@@ -1,6 +1,6 @@
 ﻿namespace AuthApi.Models
 {
-    public class UserSettings
+    public class UserSettingsDto
     {
         public required string UserId { get; set; }
     }

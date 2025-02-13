@@ -5,3 +5,11 @@ nav {
 button {
   @apply bg-slate-800 text-neutral-50 py-3 flex justify-center mr-5 px-5 hover:bg-slate-700;
 }
+
+div {
+  @apply absolute right-0 z-10 mt-10;
+}
+.button-option {
+  @apply max-w-[110px];
+  @apply bg-slate-800 text-neutral-50 rounded-none py-1 flex justify-center mr-5 hover:bg-slate-700;
+}

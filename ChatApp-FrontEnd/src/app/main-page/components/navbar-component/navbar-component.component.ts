@@ -1,5 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject, input, output } from '@angular/core';
 import { UserSettings } from '../../../services/usersettings.service';
+import { AuthenticationService } from '../../../services/api-calls/authentication.service';
+import { Router } from '@angular/router';
+import { EventEmitter } from 'stream';
 
 @Component({
   selector: 'app-navbar-component',
@@ -10,9 +13,36 @@ import { UserSettings } from '../../../services/usersettings.service';
 })
 export class NavbarComponentComponent {
   userSettings = inject(UserSettings);
+  private authenticationService = inject(AuthenticationService);
+  private router = inject(Router);
+  private isOptionsButtonActive: boolean = false;
+  private destroyRef = inject(DestroyRef);
 
-  onClick() {
-    console.log(this.userSettings.getUserProfile.UserName);
-    console.log();
+  get getIsOptionsButtonActive() {
+    return this.isOptionsButtonActive;
+  }
+
+  //detect click outside the component
+  onBodyClickDetect() {
+    if (this.isOptionsButtonActive === true) {
+      this.isOptionsButtonActive = false;
+    }
+  }
+
+  showOptions() {
+    this.isOptionsButtonActive = !this.isOptionsButtonActive;
+  }
+
+  logOut() {
+    const subscription = this.authenticationService.logout().subscribe({
+      next: (response) => {
+        this.isOptionsButtonActive = false;
+        this.router.navigate(['/', 'login']);
+      },
+      error: (error) => {
+        console.log(error);
+      },
+    });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 }

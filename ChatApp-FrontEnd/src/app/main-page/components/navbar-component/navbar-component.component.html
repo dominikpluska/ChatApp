@@ -1,6 +1,16 @@
 <nav>
-  <button (click)="onClick()">
+  <button (click)="showOptions()">
     <p class="pr-3">{{ userSettings.getUserProfile.UserName }}</p>
     <i class="bi bi-file-person"></i>
   </button>
+  @if(getIsOptionsButtonActive) {
+  <div class="absolute right-0 z-10 mt-10">
+    <!-- <button class="button-option">
+      <i class="bi bi-gear-fill"></i> Options
+    </button> -->
+    <button class="button-option" (click)="logOut()">
+      <i class="bi bi-door-open"></i>Log out
+    </button>
+  </div>
+  }
 </nav>

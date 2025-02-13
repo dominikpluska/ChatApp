@@ -8,6 +8,6 @@ namespace UserSettingsApi.Models
         [BsonId]
         public ObjectId ChatsId { get; set; }
         public required string UserId { get; set; }
-        public List<string>? ChatList { get; set; }
+        public List<string>? ChatList { get; set; } = new List<string>();
     }
 }

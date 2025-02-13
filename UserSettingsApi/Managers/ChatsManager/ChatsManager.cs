@@ -1,6 +1,5 @@
 ﻿using UserSettingsApi.DatabaseOperations.Commands.ChatsCommands;
 using UserSettingsApi.DatabaseOperations.Repository.ChatsRepository;
-using UserSettingsApi.Dto;
 using UserSettingsApi.Models;
 using UserSettingsApi.UserAccessor;
 
@@ -25,7 +24,7 @@ namespace UserSettingsApi.Managers.ChatsManager
             {
                 var userId = _userAccessor.UserId;
                 var chats = await _chatsRepository.GetChatList(userId);
-                return Results.Ok(chats);
+                return Results.Ok(chats.ChatList);
             }
             catch(Exception ex)
             {
@@ -33,13 +32,13 @@ namespace UserSettingsApi.Managers.ChatsManager
             }
         }
 
-        public async Task<IResult> CreateChatsTable(UserSettingsDto userSettingsDto)
+        public async Task<IResult> CreateChatsTable(string userId)
         {
             try
             {
                 Chat chat = new Chat()
                 {
-                    UserId = userSettingsDto.UserId,
+                    UserId = userId,
                 };
 
                 await _chatsCommands.CreateChatsTable(chat);

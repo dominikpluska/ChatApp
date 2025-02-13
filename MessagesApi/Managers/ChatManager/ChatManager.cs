@@ -26,120 +26,120 @@ namespace MessagesApi.Managers.ChatManager
             _mapper = mapper;
         }
 
-        public async Task<IResult> SendChatRequest(ChatRequestDto chatRequestDto)
-        {
-            try
-            {
-                ArgumentNullException.ThrowIfNull(chatRequestDto);
-                var userId = _userAccessor.UserId;
-                var userProperties = await _authenticationService.GetAccountProperties(userId);
+        //public async Task<IResult> SendChatRequest(ChatRequestDto chatRequestDto)
+        //{
+        //    try
+        //    {
+        //        ArgumentNullException.ThrowIfNull(chatRequestDto);
+        //        var userId = _userAccessor.UserId;
+        //        var userProperties = await _authenticationService.GetAccountProperties(userId);
 
-                if (userProperties == null || !userProperties.IsActive)
-                {
-                    return Results.Problem("User does not exist or is inactive!");
-                }
+        //        if (userProperties == null || !userProperties.IsActive)
+        //        {
+        //            return Results.Problem("User does not exist or is inactive!");
+        //        }
 
-                foreach (var user in chatRequestDto.RequestRecipient)
-                {
-                    var requestRecipient = await _authenticationService.GetAccountProperties(user);
+        //        foreach (var user in chatRequestDto.RequestRecipient)
+        //        {
+        //            var requestRecipient = await _authenticationService.GetAccountProperties(user);
 
-                    if (requestRecipient == null || requestRecipient.IsActive == false)
-                    {
-                        chatRequestDto.RequestRecipient.Remove(user);
-                    }
-                }
+        //            if (requestRecipient == null || requestRecipient.IsActive == false)
+        //            {
+        //                chatRequestDto.RequestRecipient.Remove(user);
+        //            }
+        //        }
 
-                List<ChatParticipant> chatParticipants = new List<ChatParticipant>()
-                {
-                    new ChatParticipant()
-                    {
-                        UserId = userProperties.UserAccountId,
-                        IsAccepted = true,
-                    }
-                };
-
-
-                foreach (var requestRecipient in chatRequestDto.RequestRecipient)
-                {
-                    ChatParticipant chatParticipant = new()
-                    {
-                        UserId = requestRecipient,
-                        IsAccepted = false,
-                    };
-
-                    chatParticipants.Add(chatParticipant);
-                }
-
-                Chat chat = new Chat()
-                {
-                    ChatParticipants = chatParticipants
-                };
-
-                await _chatCommands.CreateChat(chat);
-
-                //Push Notification if successfull
-
-                return Results.Ok("Chat has been created!");
-
-            }
-            catch (ArgumentNullException ex)
-            {
-                return Results.Problem("Argument Null Exception!", ex.Message);
-
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem(ex.Message);
-            }
-
-        }
-
-        public async Task<IResult> AcceptChatRequest(AcceptChatRequestDto acceptChatRequestDto)
-        {
-            try
-            {
-                ArgumentNullException.ThrowIfNull(acceptChatRequestDto);
-                var userId = _userAccessor.UserId;
-                var userProperties = await _authenticationService.GetAccountProperties(userId);
+        //        List<ChatParticipant> chatParticipants = new List<ChatParticipant>()
+        //        {
+        //            new ChatParticipant()
+        //            {
+        //                UserId = userProperties.UserAccountId,
+        //                IsAccepted = true,
+        //            }
+        //        };
 
 
-                if (userProperties == null || !userProperties.IsActive)
-                {
-                    return Results.Problem("User does not exist or is inactive!");
-                }
+        //        foreach (var requestRecipient in chatRequestDto.RequestRecipient)
+        //        {
+        //            ChatParticipant chatParticipant = new()
+        //            {
+        //                UserId = requestRecipient,
+        //                IsAccepted = false,
+        //            };
 
-                var chatId = await _chatRepository.CheckChat(ObjectId.Parse(acceptChatRequestDto.ChatId));
+        //            chatParticipants.Add(chatParticipant);
+        //        }
 
-                //To be tested!
-                if (chatId == null)
-                {
-                    return Results.Problem("Chat does not exits!");
-                }
+        //        Chat chat = new Chat()
+        //        {
+        //            ChatParticipants = chatParticipants
+        //        };
 
-                var chatParticipants = await _chatRepository.GetChatParticipants(chatId);
+        //        await _chatCommands.CreateChat(chat);
 
-                var getChatParticipant = chatParticipants.Where(x => x.UserId == userId).FirstOrDefault();
-                if (getChatParticipant == null)
-                {
-                    return Results.Problem("The user isn't a part of the chat session!");
-                }
+        //        //Push Notification if successfull
 
-                await _chatCommands.AcceptChatRequest(chatId, getChatParticipant.UserId);
+        //        return Results.Ok("Chat has been created!");
 
-                return Results.Ok("Accepted!");
+        //    }
+        //    catch (ArgumentNullException ex)
+        //    {
+        //        return Results.Problem("Argument Null Exception!", ex.Message);
 
-            }
-            catch (ArgumentNullException ex)
-            {
-                return Results.Problem("Argument Null Exception!", ex.Message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Results.Problem(ex.Message);
+        //    }
 
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem(ex.Message);
-            }
+        //}
 
-        }
+        //public async Task<IResult> AcceptChatRequest(AcceptChatRequestDto acceptChatRequestDto)
+        //{
+        //    try
+        //    {
+        //        ArgumentNullException.ThrowIfNull(acceptChatRequestDto);
+        //        var userId = _userAccessor.UserId;
+        //        var userProperties = await _authenticationService.GetAccountProperties(userId);
+
+
+        //        if (userProperties == null || !userProperties.IsActive)
+        //        {
+        //            return Results.Problem("User does not exist or is inactive!");
+        //        }
+
+        //        var chatId = await _chatRepository.CheckChat(ObjectId.Parse(acceptChatRequestDto.ChatId));
+
+        //        //To be tested!
+        //        if (chatId == null)
+        //        {
+        //            return Results.Problem("Chat does not exits!");
+        //        }
+
+        //        var chatParticipants = await _chatRepository.GetChatParticipants(chatId);
+
+        //        var getChatParticipant = chatParticipants.Where(x => x.UserId == userId).FirstOrDefault();
+        //        if (getChatParticipant == null)
+        //        {
+        //            return Results.Problem("The user isn't a part of the chat session!");
+        //        }
+
+        //        await _chatCommands.AcceptChatRequest(chatId, getChatParticipant.UserId);
+
+        //        return Results.Ok("Accepted!");
+
+        //    }
+        //    catch (ArgumentNullException ex)
+        //    {
+        //        return Results.Problem("Argument Null Exception!", ex.Message);
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Results.Problem(ex.Message);
+        //    }
+
+        //}
 
         public async Task<IResult> PostMessage(MessageDto messageDto)
         {

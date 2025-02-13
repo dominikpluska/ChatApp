@@ -13,6 +13,7 @@ namespace UserSettingsApi.Data
         public DbSet<FriendsList> FriendsLists { get; set; }
         public DbSet<BlackList> BlackLists { get; set; }
         public DbSet<Chat> Chats { get; set; }
+        public DbSet<FriendRequest> FriendRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -21,6 +22,7 @@ namespace UserSettingsApi.Data
             modelBuilder.Entity<FriendsList>();
             modelBuilder.Entity<BlackList>();
             modelBuilder.Entity<Chat>();
+            modelBuilder.Entity<FriendRequest>();
 
         }
 
