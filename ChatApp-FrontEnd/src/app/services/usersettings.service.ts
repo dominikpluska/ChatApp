@@ -13,6 +13,8 @@ export class UserSettings {
 
   private chatsList?: string[] | null;
 
+  private blackList?: string[] | null;
+
   constructor() {
     //constructor
   }
@@ -40,5 +42,13 @@ export class UserSettings {
 
   set setChatsList(chats: string[]) {
     this.chatsList = chats;
+  }
+
+  get getBlackList() {
+    return this.blackList;
+  }
+
+  set setBlackList(blackList: string[]) {
+    this.blackList = blackList;
   }
 }

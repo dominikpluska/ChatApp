@@ -1,0 +1,12 @@
+<div class="overflow-y-auto">
+  <p>Black List</p>
+  @if(!getUserSettings.getBlackList || getUserSettings.getBlackList.length ===
+  0){
+  <app-nothing-to-display />
+  } @else { @for(item of getUserSettings.getChatsList; track item){
+  <app-tiny-item-component name="{{ item }}" componentId="{{ item }}">
+    <app-tiny-button-component buttonType="chat" />
+    <app-tiny-button-component buttonType="delete" />
+  </app-tiny-item-component>
+  } }
+</div>

@@ -1,9 +1,7 @@
-<div class="w-full h-full">
-  <app-navbar-component />
-  <div class="h-full grid grid-cols-6" (click)="onBodyClickDetected()">
-    <app-sidebar-component class="col-span-1" (select)="onSelect($event)" />
-    <div class="col-span-5 h-screen">
-      <router-outlet />
-    </div>
+<app-navbar-component />
+<div class="h-screen w-full grid grid-cols-6" (click)="onBodyClickDetected()">
+  <app-sidebar-component class="col-span-1" (select)="onSelect($event)" />
+  <div class="col-span-5 h-screen">
+    <router-outlet />
   </div>
 </div>

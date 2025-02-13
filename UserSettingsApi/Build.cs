@@ -3,6 +3,7 @@ using UserSettingsApi.DatabaseOperations.Commands.BlackListCommands;
 using UserSettingsApi.DatabaseOperations.Commands.ChatsCommands;
 using UserSettingsApi.DatabaseOperations.Commands.FriendRequestCommands;
 using UserSettingsApi.DatabaseOperations.Commands.FriendsLisiCommands;
+using UserSettingsApi.DatabaseOperations.Repository.BlackListRepository;
 using UserSettingsApi.DatabaseOperations.Repository.ChatsRepository;
 using UserSettingsApi.DatabaseOperations.Repository.FriendRequestsRepository;
 using UserSettingsApi.DatabaseOperations.Repository.FriendsListRepository;
@@ -32,6 +33,7 @@ namespace UserSettingsApi
             builder.Services.AddScoped<IChatsRepository, ChatsRepository>();
             builder.Services.AddScoped<IFriendsListRepository, FriendsListRepository>();
             builder.Services.AddScoped<IFriendRequestsRepository, FriendRequestsRepository>();
+            builder.Services.AddScoped<IBlackListRepository, BlackListRepository>();
 
             builder.Services.AddScoped<IChatsCommands, ChatsCommands>();
             builder.Services.AddScoped<IFriendListCommands, FriendListCommands>();

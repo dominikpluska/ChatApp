@@ -6,6 +6,7 @@ import { AuthGuard } from './services/authguard.service';
 import { ChatPageComponent } from './main-page/pages/chat-page/chat-page.component';
 import { FriendsPageComponent } from './main-page/pages/friends-page/friends-page.component';
 import { ChatsPageComponent } from './main-page/pages/chats-page/chats-page.component';
+import { BlackListPageComponent } from './main-page/pages/black-list-page/black-list-page.component';
 
 export const routes: Routes = [
   {
@@ -24,6 +25,10 @@ export const routes: Routes = [
       {
         path: 'friends',
         component: FriendsPageComponent,
+      },
+      {
+        path: 'black-list',
+        component: BlackListPageComponent,
       },
     ],
     canActivate: [AuthGuard],

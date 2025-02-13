@@ -12,9 +12,9 @@ export class SidebarComponentComponent {
   private sideBarArray = [
     'chats',
     'friends',
+    'black-list',
     'requests',
     'search',
-    'black-list',
   ];
 
   onSelect(index: number) {
