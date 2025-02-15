@@ -11,6 +11,8 @@ namespace AuthApi.Managers.UserManager
         public Task<IResult> UpdateAccount(UserAccountUpdateDto userDto);
         public Task<IResult> CheckAuthentication();
         public Task<IResult> GetAccountProperties(string userId);
-        public Task<IResult> GetActiveUserList();
+
+        public Task<IResult> GetActiveUserCountDividedBy100();
+        public Task<IResult> GetActiveUserList(int itemsToSkip = 0);
     }
 }

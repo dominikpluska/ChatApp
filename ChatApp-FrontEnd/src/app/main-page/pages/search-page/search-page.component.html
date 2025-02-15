@@ -1,5 +1,4 @@
-<div>
-  <!-- <p>Search for a conntact</p> -->
+<div class="container">
   <form class="" [formGroup]="searchPatternForm">
     <input
       placeholder="Search for a contact..."
@@ -10,4 +9,23 @@
   @if(getSubmitted && searchPatternForm.get('searchPattern')?.errors){
   <p class="error-text-bright">Search pattern must not be empty!</p>
   }
+  <div class="sub-container">
+    @for (user of getSearchUserList; track user.userAccountId) {
+
+    <app-tiny-item-component
+      name="{{ user.userName }}"
+      componentId="{{ user.userAccountId }}"
+    >
+      <app-tiny-button-component buttonType="chat" />
+      <app-tiny-button-component buttonType="friend" />
+      <app-tiny-button-component buttonType="block" />
+    </app-tiny-item-component>
+    }
+  </div>
+  <div class="flex justify-center items-center mt-2 gap-4">
+    @if(getPaginationCount.length > 1) { @for (item of getPaginationCount; track
+    $index){
+    <button>{{ item }}</button>
+    } }
+  </div>
 </div>

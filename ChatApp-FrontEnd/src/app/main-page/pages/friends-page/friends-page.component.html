@@ -1,15 +1,19 @@
-<div class="overflow-y-auto">
+<div class="container">
   <p>Friends List</p>
   @if(!getUserSettings.getFriendsList || getUserSettings.getFriendsList.length
   === 0){
   <app-nothing-to-display />
-  } @else { @for(item of getUserSettings.getFriendsList; track item){
-  <app-tiny-item-component
-    name="{{ item.userId }}"
-    componentId="{{ item.userId }}"
-  >
-    <app-tiny-button-component buttonType="chat" />
-    <app-tiny-button-component buttonType="delete" />
-  </app-tiny-item-component>
-  } }
+  } @else {
+  <div class="sub-container">
+    @for(item of getUserSettings.getFriendsList; track item){
+    <app-tiny-item-component
+      name="{{ item.userId }}"
+      componentId="{{ item.userId }}"
+    >
+      <app-tiny-button-component buttonType="chat" />
+      <app-tiny-button-component buttonType="delete" />
+    </app-tiny-item-component>
+    }
+  </div>
+  }
 </div>

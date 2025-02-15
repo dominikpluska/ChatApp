@@ -1,19 +1,23 @@
-<div class="overflow-y-auto">
+<div class="container">
   <p>Requests List</p>
   @if(!getUserSettings.getRequestsList || getUserSettings.getRequestsList.length
   === 0){
   <app-nothing-to-display />
-  } @else { @for(item of getUserSettings.getRequestsList; track item){
-  <app-tiny-item-component
-    name="{{ item.userName }}"
-    componentId="{{ item.requestId }}"
-  >
-    @if(item.isAccepted){
-    <app-tiny-button-component buttonType="accepted" />
-    } @else {
-    <app-tiny-button-component buttonType="approve" />
-    <app-tiny-button-component buttonType="delete" />
+  } @else{
+  <div class="sub-container">
+    @for(item of getUserSettings.getRequestsList; track item){
+    <app-tiny-item-component
+      name="{{ item.userName }}"
+      componentId="{{ item.requestId }}"
+    >
+      @if(item.isAccepted){
+      <app-tiny-button-component buttonType="accepted" />
+      } @else {
+      <app-tiny-button-component buttonType="approve" />
+      <app-tiny-button-component buttonType="delete" />
+      }
+    </app-tiny-item-component>
     }
-  </app-tiny-item-component>
-  } }
+  </div>
+  }
 </div>

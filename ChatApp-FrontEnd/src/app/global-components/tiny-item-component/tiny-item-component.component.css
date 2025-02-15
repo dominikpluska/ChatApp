@@ -1,5 +1,5 @@
 .container {
-  @apply mt-2 ml-20 w-11/12;
+  @apply mt-4 w-11/12;
 }
 .sub-container {
   @apply flex justify-between;

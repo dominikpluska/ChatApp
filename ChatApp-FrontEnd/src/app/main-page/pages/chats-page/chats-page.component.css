@@ -1,5 +1,9 @@
-div {
-  @apply mt-24 h-5/6 mr-8 overflow-auto;
+.container {
+  @apply mt-24 ml-10 h-5/6 w-11/12;
+}
+
+.sub-container {
+  @apply h-3/4 overflow-y-auto;
 }
 
 p {

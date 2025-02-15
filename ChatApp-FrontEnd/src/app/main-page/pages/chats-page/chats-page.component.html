@@ -1,12 +1,16 @@
-<div class="overflow-y-auto">
+<div class="container">
   <p>Chats List</p>
   @if(!getUserSettings.getChatsList || getUserSettings.getChatsList.length ===
   0){
   <app-nothing-to-display />
-  } @else { @for(item of getUserSettings.getChatsList; track item){
-  <app-tiny-item-component name="{{ item }}" componentId="{{ item }}">
-    <app-tiny-button-component buttonType="chat" />
-    <app-tiny-button-component buttonType="delete" />
-  </app-tiny-item-component>
-  } }
+  } @else {
+  <div class="sub-container">
+    @for(item of getUserSettings.getChatsList; track item){
+    <app-tiny-item-component name="{{ item }}" componentId="{{ item }}">
+      <app-tiny-button-component buttonType="chat" />
+      <app-tiny-button-component buttonType="delete" />
+    </app-tiny-item-component>
+    }
+  </div>
+  }
 </div>

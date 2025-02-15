@@ -51,13 +51,33 @@ namespace AuthApi.DataBaseOperations.Repository.UserAccountsRepository
             return _mapper.Map<IEnumerable<UserAccountDto>>(result);
         }
 
-        public async Task<IEnumerable<UserAccount>> GetTop100ActiveUsersOrderedAlphabetically()
+        public async Task<int> GetActiveUsersCount()
         {
-            IQueryable<UserAccount> result = _context.UserAccounts.Include(role => role.Role)
-                                            .Where(x => x.IsActive == true)
-                                            .OrderBy(x => x.UserName).Take(100);
+            try
+            {
+                var userCount = await _context.UserAccounts.Where(x => x.IsActive == true).CountAsync();
+                return userCount;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
-            return await result.ToListAsync();
+        public async Task<IEnumerable<UserAccount>> GetTop100ActiveUsersOrderedAlphabetically(int itemsToSkip)
+        {
+            try
+            {
+                IQueryable<UserAccount> result = _context.UserAccounts.Include(role => role.Role)
+                                .Where(x => x.IsActive == true)
+                                .OrderBy(x => x.UserName).Skip(itemsToSkip).Take(100);
+
+                return await result.ToListAsync();
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

@@ -316,14 +316,38 @@ namespace AuthApi.Managers.UserManager
             }
         }
 
-        //Get top 100 Users sorted alphabetically
-        public async Task<IResult> GetActiveUserList()
+        public async Task<IResult> GetActiveUserCountDividedBy100()
         {
-            var result = await _userAccountsRepository.GetTop100ActiveUsersOrderedAlphabetically();
-            List<UserAccountDto> userAccountDtos = new();
-            var userList = _mapper.Map(result, userAccountDtos);
-
-            return Results.Ok(userList);
+            try
+            {
+                var userCount = await _userAccountsRepository.GetActiveUsersCount();
+                var userCountDividedBy100 = Math.Ceiling((double)userCount / 100);
+                return Results.Ok((int)userCountDividedBy100);
+            }
+            catch(Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
         }
+
+        public async Task<IResult> GetActiveUserList(int itemsToSkip = 0)
+        {
+            try
+            {
+                //Check how many items are in the database first.
+                
+                var result = await _userAccountsRepository.GetTop100ActiveUsersOrderedAlphabetically(itemsToSkip);
+                List<UserAccountDto> userAccountDtos = new();
+                var userList = _mapper.Map(result, userAccountDtos);
+
+                return Results.Ok(userList);
+            }
+            catch(Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        }
+
+        //Search For user Method
     }
 }

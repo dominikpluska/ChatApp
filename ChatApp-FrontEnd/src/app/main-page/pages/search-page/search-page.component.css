@@ -1,11 +1,13 @@
-div {
+/* div {
   @apply mt-24 ml-10 h-5/6 mr-8 overflow-auto;
+} */
+.container {
+  @apply mt-24 ml-10 h-5/6 w-11/12;
 }
 
-/* p {
-  color: #7886c7;
-  @apply text-2xl font-bold pb-4;
-} */
+.sub-container {
+  @apply h-3/4 overflow-y-auto;
+}
 
 form {
   @apply flex w-2/6;
