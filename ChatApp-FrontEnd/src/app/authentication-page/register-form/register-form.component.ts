@@ -7,8 +7,6 @@ import {
 } from '@angular/forms';
 import { Register } from '../../models/register.model';
 import { AuthenticationService } from '../../services/api-calls/authentication.service';
-import { response } from 'express';
-import { error } from 'console';
 import { Router } from '@angular/router';
 
 @Component({

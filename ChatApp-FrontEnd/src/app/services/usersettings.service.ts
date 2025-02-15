@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { UserProfile } from '../models/userprofile.model';
 import { Friend } from '../models/friend';
+import { AppRequest } from '../models/apprequest.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserSettings {
@@ -14,6 +15,8 @@ export class UserSettings {
   private chatsList?: string[] | null;
 
   private blackList?: string[] | null;
+
+  private requestsList?: AppRequest[] | null;
 
   constructor() {
     //constructor
@@ -50,5 +53,13 @@ export class UserSettings {
 
   set setBlackList(blackList: string[]) {
     this.blackList = blackList;
+  }
+
+  get getRequestsList() {
+    return this.requestsList;
+  }
+
+  set setRequestsList(requests: AppRequest[]) {
+    this.requestsList = requests;
   }
 }

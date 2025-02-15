@@ -50,5 +50,14 @@ namespace AuthApi.DataBaseOperations.Repository.UserAccountsRepository
 
             return _mapper.Map<IEnumerable<UserAccountDto>>(result);
         }
+
+        public async Task<IEnumerable<UserAccount>> GetTop100ActiveUsersOrderedAlphabetically()
+        {
+            IQueryable<UserAccount> result = _context.UserAccounts.Include(role => role.Role)
+                                            .Where(x => x.IsActive == true)
+                                            .OrderBy(x => x.UserName).Take(100);
+
+            return await result.ToListAsync();
+        }
     }
 }

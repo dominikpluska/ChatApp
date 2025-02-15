@@ -315,5 +315,15 @@ namespace AuthApi.Managers.UserManager
                 return Results.Problem(ex.Message);
             }
         }
+
+        //Get top 100 Users sorted alphabetically
+        public async Task<IResult> GetActiveUserList()
+        {
+            var result = await _userAccountsRepository.GetTop100ActiveUsersOrderedAlphabetically();
+            List<UserAccountDto> userAccountDtos = new();
+            var userList = _mapper.Map(result, userAccountDtos);
+
+            return Results.Ok(userList);
+        }
     }
 }

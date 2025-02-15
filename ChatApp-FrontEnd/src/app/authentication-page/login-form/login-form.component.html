@@ -1,5 +1,5 @@
 <div>
-  <form [formGroup]="loginForm">
+  <form [formGroup]="loginForm" class="form-container">
     <h1>Log in to continue!</h1>
     @if(getSubmitted && loginForm.get('UserName')?.errors || getSubmitted &&
     loginForm.get('Password')?.errors || getSubmitted && getErrorMessage) {

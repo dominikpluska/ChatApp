@@ -2,6 +2,7 @@
 using UserSettingsApi.Managers.BlackListsManager;
 using UserSettingsApi.Managers.ChatsManager;
 using UserSettingsApi.Managers.FriendsListsManager;
+using UserSettingsApi.Managers.RequestsManager;
 
 namespace UserSettingsApi
 {
@@ -27,6 +28,12 @@ namespace UserSettingsApi
             app.MapPost("/SentFriendRequest/{userId}", async (string userId) => await friendManager.SendFriendRequests(userId));
             app.MapPost("/CreateFriendsListTable/{userId}", async (string userId) => await friendManager.CreateFriendsListTable(userId));
             app.MapPut("/AcceptFriendRequest/{requestId}", async (string requestId) => await friendManager.AcceptFriendRequest(requestId));
+            return app;
+        }
+
+        public static WebApplication MapRequestsManagerEndpoints(this WebApplication app, IRequestManager requestManager)
+        {
+            app.MapGet("/GetAllRequests", async () => await requestManager.GetAllRequests());
             return app;
         }
     }

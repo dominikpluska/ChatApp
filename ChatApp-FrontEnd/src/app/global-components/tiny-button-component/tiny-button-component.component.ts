@@ -8,5 +8,5 @@ import { Component, input } from '@angular/core';
   styleUrl: './tiny-button-component.component.css',
 })
 export class TinyButtonComponentComponent {
-  buttonType = input.required<'delete' | 'chat' | 'approve'>();
+  buttonType = input.required<'delete' | 'chat' | 'approve' | 'accepted'>();
 }

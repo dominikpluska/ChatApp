@@ -15,8 +15,8 @@ namespace UserSettingsApi.Data
         public IMongoCollection<BsonDocument> ChatsCollectionBson { get; init; }
         public IMongoCollection<BlackList> BlackListsCollection { get; init; }
         public IMongoCollection<BsonDocument> BlackListsCollectionBson { get; init; }
-        public IMongoCollection<FriendRequest> FriendRequestsCollection { get; init; }
-        public IMongoCollection<BsonDocument> FriendRequestsCollectionBson { get; init; }
+        public IMongoCollection<Request> RequestsCollection { get; init; }
+        public IMongoCollection<BsonDocument> RequestsCollectionBson { get; init; }
 
         public MongoDBService(IConfiguration configuration)
         {
@@ -32,8 +32,8 @@ namespace UserSettingsApi.Data
             ChatsCollectionBson = database.GetCollection<BsonDocument>(mongoCollections[1]);
             BlackListsCollection = database.GetCollection<BlackList>(mongoCollections[2]);
             BlackListsCollectionBson = database.GetCollection<BsonDocument>(mongoCollections[2]);
-            FriendRequestsCollection = database.GetCollection<FriendRequest>(mongoCollections[3]);
-            FriendRequestsCollectionBson = database.GetCollection<BsonDocument>(mongoCollections[3]);
+            RequestsCollection = database.GetCollection<Request>(mongoCollections[3]);
+            RequestsCollectionBson = database.GetCollection<BsonDocument>(mongoCollections[3]);
         }
     }
 }

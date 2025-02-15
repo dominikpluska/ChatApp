@@ -1,0 +1,13 @@
+<div>
+  <!-- <p>Search for a conntact</p> -->
+  <form class="" [formGroup]="searchPatternForm">
+    <input
+      placeholder="Search for a contact..."
+      formControlName="searchPattern"
+    />
+    <button (click)="onSearch()"><i class="bi bi-search"></i></button>
+  </form>
+  @if(getSubmitted && searchPatternForm.get('searchPattern')?.errors){
+  <p class="error-text-bright">Search pattern must not be empty!</p>
+  }
+</div>

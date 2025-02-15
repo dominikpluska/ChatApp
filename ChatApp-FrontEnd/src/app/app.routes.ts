@@ -7,6 +7,8 @@ import { ChatPageComponent } from './main-page/pages/chat-page/chat-page.compone
 import { FriendsPageComponent } from './main-page/pages/friends-page/friends-page.component';
 import { ChatsPageComponent } from './main-page/pages/chats-page/chats-page.component';
 import { BlackListPageComponent } from './main-page/pages/black-list-page/black-list-page.component';
+import { RequestsPageComponent } from './main-page/pages/requests-page/requests-page.component';
+import { SearchPageComponent } from './main-page/pages/search-page/search-page.component';
 
 export const routes: Routes = [
   {
@@ -29,6 +31,14 @@ export const routes: Routes = [
       {
         path: 'black-list',
         component: BlackListPageComponent,
+      },
+      {
+        path: 'requests',
+        component: RequestsPageComponent,
+      },
+      {
+        path: 'search',
+        component: SearchPageComponent,
       },
     ],
     canActivate: [AuthGuard],

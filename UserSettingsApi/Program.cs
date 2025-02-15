@@ -9,6 +9,7 @@ using UserSettingsApi.DatabaseOperations.Repository.ChatsRepository;
 using UserSettingsApi.Managers.BlackListsManager;
 using UserSettingsApi.Managers.ChatsManager;
 using UserSettingsApi.Managers.FriendsListsManager;
+using UserSettingsApi.Managers.RequestsManager;
 using UserSettingsApi.UserAccessor;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -93,10 +94,12 @@ using var scope = app.Services.CreateScope();
 var chatsManager = scope.ServiceProvider.GetRequiredService<IChatsManager>();
 var blackListsManager = scope.ServiceProvider.GetRequiredService<IBlackListsManager>(); 
 var friendsListsManager = scope.ServiceProvider.GetRequiredService<IFriendManager>();
+var requestsManager = scope.ServiceProvider.GetRequiredService<IRequestManager>();
 
 app.MapChatsEndpoints(chatsManager)
     .MapBlackListsEndpoints(blackListsManager)
-    .MapFriendsManagerEndpoints(friendsListsManager);
+    .MapFriendsManagerEndpoints(friendsListsManager)
+    .MapRequestsManagerEndpoints(requestsManager);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

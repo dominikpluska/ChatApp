@@ -10,6 +10,7 @@ using UserSettingsApi.DatabaseOperations.Repository.FriendsListRepository;
 using UserSettingsApi.Managers.BlackListsManager;
 using UserSettingsApi.Managers.ChatsManager;
 using UserSettingsApi.Managers.FriendsListsManager;
+using UserSettingsApi.Managers.RequestsManager;
 using UserSettingsApi.Services;
 using UserSettingsApi.UserAccessor;
 
@@ -22,6 +23,7 @@ namespace UserSettingsApi
         {
             builder.Services.AddHttpClient();
             builder.Services.AddAuthorization();
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             builder.Services.AddSingleton<MongoDBService>();
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -29,10 +31,11 @@ namespace UserSettingsApi
             builder.Services.AddScoped<IChatsManager, ChatsManager>();
             builder.Services.AddScoped<IFriendManager, FriendManager>();
             builder.Services.AddScoped<IBlackListsManager, BlackListsManager>();
+            builder.Services.AddScoped<IRequestManager, RequestManager>();
 
             builder.Services.AddScoped<IChatsRepository, ChatsRepository>();
             builder.Services.AddScoped<IFriendsListRepository, FriendsListRepository>();
-            builder.Services.AddScoped<IFriendRequestsRepository, FriendRequestsRepository>();
+            builder.Services.AddScoped<IRequestsRepository, RequestsRepository>();
             builder.Services.AddScoped<IBlackListRepository, BlackListRepository>();
 
             builder.Services.AddScoped<IChatsCommands, ChatsCommands>();

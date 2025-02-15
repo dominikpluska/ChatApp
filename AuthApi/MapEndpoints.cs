@@ -14,8 +14,9 @@ namespace AuthApi
             app.MapPost("/Logout", async () => await userManager.LogOut());
             app.MapPost("/ChangePassword", async (UserPasswordChangeDto passwordChange) => await userManager.UpdatePassword(passwordChange));
             app.MapPost("/UpdateUser", async (UserAccountUpdateDto userDto) => await userManager.UpdateAccount(userDto));
-            app.MapGet("/AuthCheck", () => userManager.CheckAuthentication());
-            app.MapGet("/GetAccountProperties", (string userId) => userManager.GetAccountProperties(userId));
+            app.MapGet("/AuthCheck", async () => await userManager.CheckAuthentication());
+            app.MapGet("/GetAccountProperties", async (string userId) => await userManager.GetAccountProperties(userId));
+            app.MapGet("/GetActiveUserList", async () => await userManager.GetActiveUserList());
 
             return app;
         }

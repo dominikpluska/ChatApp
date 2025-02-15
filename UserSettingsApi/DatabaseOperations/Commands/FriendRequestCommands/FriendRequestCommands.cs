@@ -15,12 +15,12 @@ namespace UserSettingsApi.DatabaseOperations.Commands.FriendRequestCommands
             _mongoDBService = mongoDBService;
         }
 
-        public async Task<IResult> InsertFriendRequests(FriendRequest friendRequest)
+        public async Task<IResult> InsertFriendRequests(Request friendRequest)
         {
             try
             {
                 ArgumentNullException.ThrowIfNull(friendRequest);
-                await _mongoDBService.FriendRequestsCollection.InsertOneAsync(friendRequest);
+                await _mongoDBService.RequestsCollection.InsertOneAsync(friendRequest);
                 return Results.Ok("Friend request has been sent");
             }
             catch (ArgumentNullException ex)
@@ -39,8 +39,8 @@ namespace UserSettingsApi.DatabaseOperations.Commands.FriendRequestCommands
             {
                 ArgumentNullException.ThrowIfNull(friendRequestId);
 
-                var filter = Builders<FriendRequest>.Filter.Eq(x => x.RequestId, friendRequestId);
-                await _mongoDBService.FriendRequestsCollection.DeleteOneAsync(filter);
+                var filter = Builders<Request>.Filter.Eq(x => x.RequestId, friendRequestId);
+                await _mongoDBService.RequestsCollection.DeleteOneAsync(filter);
 
                 return Results.Ok("Friend request has been sent");
             }
@@ -60,10 +60,10 @@ namespace UserSettingsApi.DatabaseOperations.Commands.FriendRequestCommands
             {
                 ArgumentNullException.ThrowIfNull(friendRequestId);
 
-                var filter = Builders<FriendRequest>.Filter.Eq(x => x.RequestId, friendRequestId);
-                var update = Builders<FriendRequest>.Update.Set(x => x.IsAccepted, true);
+                var filter = Builders<Request>.Filter.Eq(x => x.RequestId, friendRequestId);
+                var update = Builders<Request>.Update.Set(x => x.IsAccepted, true);
 
-                await _mongoDBService.FriendRequestsCollection.UpdateOneAsync(filter, update);
+                await _mongoDBService.RequestsCollection.UpdateOneAsync(filter, update);
 
                 return Results.Ok("Chat updated!");
 

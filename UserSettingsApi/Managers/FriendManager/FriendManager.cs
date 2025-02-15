@@ -17,11 +17,11 @@ namespace UserSettingsApi.Managers.FriendsListsManager
         private readonly IFriendsListRepository _friendsListRepository;
         private readonly IAuthenticationService _authenticationService;
         private readonly IFriendRequestCommands _friendRequestCommands;
-        private readonly IFriendRequestsRepository _friendRequestsRepository;
+        private readonly IRequestsRepository _friendRequestsRepository;
 
         public FriendManager(IUserAccessor userAccessor, IFriendListCommands friendListCommands, 
             IFriendsListRepository friendsListRepository, IAuthenticationService authenticationService,
-            IFriendRequestCommands friendRequestCommands, IFriendRequestsRepository friendRequestsRepository)
+            IFriendRequestCommands friendRequestCommands, IRequestsRepository friendRequestsRepository)
         {
             _userAccessor = userAccessor;
             _friendListCommands = friendListCommands;
@@ -108,7 +108,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 //Check if user is already on the friend list
 
-                FriendRequest friendRequest = new()
+                Request friendRequest = new()
                 {
                     RequestorId = userProperties.UserAccountId,
                     RequesteeId = newFriendProperties.UserAccountId
@@ -146,7 +146,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                     return Results.Problem("User is inactive!");
                 }
 
-                var friendRequest = await _friendRequestsRepository.GetFriendRequest(requestIdParsed);
+                var friendRequest = await _friendRequestsRepository.GetRequests(requestIdParsed);
 
                 if(friendRequest.RequesteeId != userId)
                 {

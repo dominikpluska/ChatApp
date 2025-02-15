@@ -3,12 +3,13 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace UserSettingsApi.Models
 {
-    public class FriendRequest
+    public class Request
     {
         [BsonId]
         public ObjectId RequestId { get; set; }
         public required string RequestorId { get; set; }
         public required string RequesteeId { get; set; }
+        public string RequestType { get; set; } = "FriendRequest";
         public bool IsAccepted { get; set; } = false;
     }
 }

@@ -1,12 +1,12 @@
 <div>
   @if(getWasCreated) {
-  <form>
+  <form class="form-container">
     <p>Account has been created!</p>
     <button (click)="onRoute()">Login Page</button>
   </form>
   } @else {
 
-  <form [formGroup]="registerForm">
+  <form [formGroup]="registerForm" class="form-container">
     <h1>Register new account</h1>
     @if(getSubmitted && (registerForm.get('UserName')?.errors ||
     registerForm.get('Email')?.errors || registerForm.get('Password')?.errors ||
