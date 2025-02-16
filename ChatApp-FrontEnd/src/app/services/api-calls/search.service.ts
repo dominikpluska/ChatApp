@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { authApi } from '../apipath';
-import { catchError, Observable, throwError } from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 import { SearchUser } from '../../models/searchuser.model';
 
 @Injectable({ providedIn: 'root' })
@@ -12,7 +12,9 @@ export class SearchService {
 
   getContacts(itemsToSkip: number = 0) {
     return this.htppClient
-      .get<SearchUser[]>(`${authApi}GetActiveUserList/s=${itemsToSkip}`)
+      .get<{ userList: SearchUser[]; activeUsersCount: number }>(
+        `${authApi}GetActiveUserList/s=${itemsToSkip}`
+      )
       .pipe(
         catchError((error) => {
           const errorMessage = error.status;
@@ -21,9 +23,9 @@ export class SearchService {
       );
   }
 
-  getUserCountPagination() {
+  searchForUser(userName: string) {
     return this.htppClient
-      .get<number>(`${authApi}GetActiveUsersListsDividedBy100`)
+      .get<SearchUser[]>(`${authApi}Search/${userName.toLowerCase()}`)
       .pipe(
         catchError((error) => {
           const errorMessage = error.status;

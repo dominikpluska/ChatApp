@@ -8,7 +8,7 @@ import {
 import { SearchService } from '../../../services/api-calls/search.service';
 import { TinyItemComponentComponent } from '../../../global-components/tiny-item-component/tiny-item-component.component';
 import { TinyButtonComponentComponent } from '../../../global-components/tiny-button-component/tiny-button-component.component';
-import { forkJoin } from 'rxjs';
+import { BlockList } from 'net';
 
 @Component({
   selector: 'app-search-page',
@@ -23,22 +23,34 @@ import { forkJoin } from 'rxjs';
 })
 export class SearchPageComponent implements OnInit {
   private submitted: boolean = false;
+  private isSearched: boolean = false;
   private searchService = inject(SearchService);
   private destroyRef = inject(DestroyRef);
   private currentPaginationSelection = 1;
 
+  //implement adding and blocking users from this view
+  //implement chat route
+
   searchPatternForm = new FormGroup({
-    searchPattern: new FormControl<string>('', [Validators.required]),
+    searchPattern: new FormControl<string>('', [
+      Validators.required,
+      Validators.maxLength(25),
+    ]),
   });
 
   ngOnInit(): void {
-    forkJoin([
-      this.searchService.getContacts(),
-      this.searchService.getUserCountPagination(),
-    ]).subscribe((result) => {
-      this.searchService.setSearchUserList = result[0];
-      this.searchService.setUserPaginationCount = result[1];
-    });
+    if (this.searchService.getSearchUserList === undefined) {
+      const subscription = this.searchService.getContacts().subscribe({
+        next: (response) => {
+          this.searchService.setSearchUserList = response.userList;
+          this.searchService.setUserPaginationCount = response.activeUsersCount;
+        },
+        error: (error) => {
+          console.log(error);
+        },
+      });
+      this.destroyRef.onDestroy(() => subscription.unsubscribe());
+    }
   }
 
   get getSearchUserList() {
@@ -73,10 +85,28 @@ export class SearchPageComponent implements OnInit {
     return fa;
   }
 
-  //Work on the search method!
   onSearch() {
     this.submitted = true;
-    console.log(this.searchPatternForm.value);
+
+    const subscription = this.searchService
+      .searchForUser(this.searchPatternForm.value.searchPattern!)
+      .subscribe({
+        next: (response) => {
+          if (response.length > 0) {
+            this.isSearched = true;
+            this.searchService.setSearchUserList = response;
+          }
+          this.submitted = false;
+        },
+        error: (error) => {
+          console.log(error);
+        },
+      });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
+  get getIsSearched() {
+    return this.isSearched;
   }
 
   get getSubmitted() {
@@ -89,12 +119,27 @@ export class SearchPageComponent implements OnInit {
       .getContacts(pagination - 1)
       .subscribe({
         next: (response) => {
-          this.searchService.setSearchUserList = response;
+          this.searchService.setSearchUserList = response.userList;
         },
         error: (error) => {
           console.log(error);
         },
       });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
+  onClearSearch() {
+    const subscription = this.searchService.getContacts().subscribe({
+      next: (response) => {
+        this.searchService.setSearchUserList = response.userList;
+        this.searchService.setUserPaginationCount = response.activeUsersCount;
+        this.isSearched = false;
+        this.submitted = false;
+      },
+      error: (error) => {
+        console.log(error);
+      },
+    });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 }

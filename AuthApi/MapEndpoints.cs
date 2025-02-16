@@ -17,8 +17,8 @@ namespace AuthApi
             app.MapGet("/AuthCheck", async () => await userManager.CheckAuthentication());
             app.MapGet("/GetAccountProperties", async (string userId) => await userManager.GetAccountProperties(userId));
             app.MapGet("/GetActiveUserList", async () => await userManager.GetActiveUserList());
-            app.MapGet("/GetActiveUsersListsDividedBy100", async () => await userManager.GetActiveUserCountDividedBy100());
             app.MapGet("/GetActiveUserList/s={itemsToSkip}", async (int itemsToSkip) => await userManager.GetActiveUserList(itemsToSkip));
+            app.MapGet("/Search/{userName}", async (string userName) => await userManager.SearchForUser(userName));
 
             return app;
         }

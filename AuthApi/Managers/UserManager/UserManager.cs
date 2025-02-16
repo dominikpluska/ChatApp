@@ -26,6 +26,7 @@ namespace AuthApi.Managers.UserManager
         private readonly IMapper _mapper;
         private readonly IUserSettingsService _userSettingsService;
         private readonly int _passwordLength = 8;
+        private readonly int _pagination = 20;
 
         public UserManager(IUserAccountsRepository userAccountsRepository, IUserAccountsCommands userAccountsCommands, IJwt jwt, ICookieGenerator cookieGenerator,
             IRoleRepository roleRepository, IUserAccessor userAccessor, IMapper mapper, IUserSettingsService userSettingsService)
@@ -316,31 +317,17 @@ namespace AuthApi.Managers.UserManager
             }
         }
 
-        public async Task<IResult> GetActiveUserCountDividedBy100()
-        {
-            try
-            {
-                var userCount = await _userAccountsRepository.GetActiveUsersCount();
-                var userCountDividedBy100 = Math.Ceiling((double)userCount / 100);
-                return Results.Ok((int)userCountDividedBy100);
-            }
-            catch(Exception ex)
-            {
-                return Results.Problem(ex.Message);
-            }
-        }
-
         public async Task<IResult> GetActiveUserList(int itemsToSkip = 0)
         {
             try
             {
-                //Check how many items are in the database first.
-                
-                var result = await _userAccountsRepository.GetTop100ActiveUsersOrderedAlphabetically(itemsToSkip * 100);
+                var activeUsersCount = await _userAccountsRepository.GetActiveUsersCount() / _pagination;
+
+                var result = await _userAccountsRepository.GetTopActiveUsersOrderedAlphabetically(itemsToSkip * _pagination);
                 List<UserAccountDto> userAccountDtos = new();
                 var userList = _mapper.Map(result, userAccountDtos);
 
-                return Results.Ok(userList);
+                return Results.Ok(new { userList, activeUsersCount});
             }
             catch(Exception ex)
             {
@@ -348,6 +335,32 @@ namespace AuthApi.Managers.UserManager
             }
         }
 
-        //Search For user Method
+        //Implement pagination here as well
+        public async Task<IResult> SearchForUser(string userName)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(userName);
+
+                userName = userName.Trim();
+
+                var resutls = await _userAccountsRepository.Search(userName);
+                var activeUsersCount = resutls.Count() / _pagination;
+
+                List<UserAccountDto> userAccountDtos = new();
+                var userList = _mapper.Map(resutls, userAccountDtos);
+
+                return Results.Ok(userList);
+
+            }
+            catch(ArgumentNullException ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+            catch(Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        }
     }
 }
