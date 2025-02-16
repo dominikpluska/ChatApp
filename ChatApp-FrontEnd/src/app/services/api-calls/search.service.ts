@@ -1,14 +1,14 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { authApi } from '../apipath';
-import { catchError, throwError } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 import { SearchUser } from '../../models/searchuser.model';
 
 @Injectable({ providedIn: 'root' })
 export class SearchService {
   private htppClient = inject(HttpClient);
   private searchUserList?: SearchUser[];
-  private userPaginationCount?: number;
+  private userPaginationCount!: number;
 
   getContacts(itemsToSkip: number = 0) {
     return this.htppClient
@@ -40,7 +40,7 @@ export class SearchService {
     return this.searchUserList;
   }
 
-  get getUserPaginationCount() {
+  get getUserPagination() {
     return this.userPaginationCount;
   }
 

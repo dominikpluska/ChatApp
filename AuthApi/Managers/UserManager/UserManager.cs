@@ -336,7 +336,7 @@ namespace AuthApi.Managers.UserManager
             {
                 //Check how many items are in the database first.
                 
-                var result = await _userAccountsRepository.GetTop100ActiveUsersOrderedAlphabetically(itemsToSkip);
+                var result = await _userAccountsRepository.GetTop100ActiveUsersOrderedAlphabetically(itemsToSkip * 100);
                 List<UserAccountDto> userAccountDtos = new();
                 var userList = _mapper.Map(result, userAccountDtos);
 

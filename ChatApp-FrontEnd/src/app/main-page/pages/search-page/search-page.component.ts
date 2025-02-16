@@ -8,6 +8,7 @@ import {
 import { SearchService } from '../../../services/api-calls/search.service';
 import { TinyItemComponentComponent } from '../../../global-components/tiny-item-component/tiny-item-component.component';
 import { TinyButtonComponentComponent } from '../../../global-components/tiny-button-component/tiny-button-component.component';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-search-page',
@@ -31,26 +32,13 @@ export class SearchPageComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const subscription = this.searchService.getContacts().subscribe({
-      next: (response) => {
-        this.searchService.setSearchUserList = response;
-        const subscription2 = this.searchService
-          .getUserCountPagination()
-          .subscribe({
-            next: (response) => {
-              this.searchService.setUserPaginationCount = response;
-            },
-            error: (error) => {
-              console.log(error);
-            },
-          });
-        this.destroyRef.onDestroy(() => subscription2.unsubscribe());
-      },
-      error: (error) => {
-        console.log(error);
-      },
+    forkJoin([
+      this.searchService.getContacts(),
+      this.searchService.getUserCountPagination(),
+    ]).subscribe((result) => {
+      this.searchService.setSearchUserList = result[0];
+      this.searchService.setUserPaginationCount = result[1];
     });
-    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
   get getSearchUserList() {
@@ -61,10 +49,8 @@ export class SearchPageComponent implements OnInit {
     return this.currentPaginationSelection;
   }
 
-  //fix this method
   get getPaginationCount() {
-    //let paginationCount = this.searchService.getUserCountPagination;
-    let paginationCount = 50;
+    let paginationCount = this.searchService.getUserPagination;
     let fa: number[] = [];
     if (paginationCount < 6) {
       for (let i = 1; i <= paginationCount; i++) {
@@ -87,6 +73,7 @@ export class SearchPageComponent implements OnInit {
     return fa;
   }
 
+  //Work on the search method!
   onSearch() {
     this.submitted = true;
     console.log(this.searchPatternForm.value);
@@ -94,5 +81,20 @@ export class SearchPageComponent implements OnInit {
 
   get getSubmitted() {
     return this.submitted;
+  }
+
+  set setPaginationSelection(pagination: number) {
+    this.currentPaginationSelection = pagination;
+    const subscription = this.searchService
+      .getContacts(pagination - 1)
+      .subscribe({
+        next: (response) => {
+          this.searchService.setSearchUserList = response;
+        },
+        error: (error) => {
+          console.log(error);
+        },
+      });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 }

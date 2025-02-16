@@ -73,10 +73,11 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetValue<string>("ConnectionStrings:DefaultConnection"));
 });
+
 builder.Services.AddAuthorization();
 
 builder.AddServices();

@@ -24,8 +24,16 @@
   </div>
   <div class="flex justify-center items-center mt-2 gap-4">
     @if(getPaginationCount.length > 1) { @for (item of getPaginationCount; track
-    $index){
-    <button>{{ item }}</button>
-    } }
+    $index){ @if(getCurrentPaginationSelection === item){
+    <button
+      (click)="setPaginationSelection = item"
+      class="page-active"
+      disabled
+    >
+      {{ item }}
+    </button>
+    } @else {
+    <button (click)="setPaginationSelection = item">{{ item }}</button>
+    } } }
   </div>
 </div>

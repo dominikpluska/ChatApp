@@ -7,23 +7,25 @@ namespace AuthApi.DataBaseOperations.Commands.RoleCommands
 {
     public class RoleCommands : IRoleCommands
     {
-        private readonly ApplicationDbContext _context;
-        public RoleCommands(ApplicationDbContext context)
+        private readonly IDbContextFactory<ApplicationDbContext> _context;
+        public RoleCommands(IDbContextFactory<ApplicationDbContext> context)
         {
             _context = context;
         }
 
         public async Task<IResult> AddNewRole(string roleName)
         {
+            using var dbContext = await _context.CreateDbContextAsync();
             Role role = new Role() { RoleName = roleName };
-            await _context.Roles.AddAsync(role);
-            await _context.SaveChangesAsync();
+            await dbContext.Roles.AddAsync(role);
+            await dbContext.SaveChangesAsync();
             return Results.Ok("New Role has been added");
         }
 
         public async Task<IResult> UpdateRole(RoleDto roleDto)
         {
-            await _context.Roles.Where(x => x.RoleId == roleDto.RoleId).ExecuteUpdateAsync(x => x.SetProperty(
+            using var dbContext = await _context.CreateDbContextAsync();
+            await dbContext.Roles.Where(x => x.RoleId == roleDto.RoleId).ExecuteUpdateAsync(x => x.SetProperty(
                 x => x.RoleName, x => roleDto.RoleName
                 ));
 
@@ -32,10 +34,10 @@ namespace AuthApi.DataBaseOperations.Commands.RoleCommands
 
         public async Task<IResult> DeleteRole(string roleId)
         {
-            await _context.Roles.Where(x => x.RoleId == roleId).ExecuteDeleteAsync();
+            using var dbContext = await _context.CreateDbContextAsync();
+            await dbContext.Roles.Where(x => x.RoleId == roleId).ExecuteDeleteAsync();
             return Results.Ok("Record Deleted!");
         }
-
 
     }
 }

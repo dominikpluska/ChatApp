@@ -9,9 +9,9 @@ namespace AuthApi.DataBaseOperations.Commands.UserAccountsCommands
 {
     public class UserAccountsCommands : IUserAccountsCommands
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IDbContextFactory<ApplicationDbContext> _context;
         private readonly IMapper _mapper;   
-        public UserAccountsCommands(ApplicationDbContext context, IMapper mapper)
+        public UserAccountsCommands(IDbContextFactory<ApplicationDbContext> context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -21,9 +21,10 @@ namespace AuthApi.DataBaseOperations.Commands.UserAccountsCommands
         {
             try
             {
+                using var dbContext = await _context.CreateDbContextAsync();
                 var user = _mapper.Map<UserAccount>(userRegistration);
-                var userFromDb = await _context.UserAccounts.AddAsync(user);
-                await _context.SaveChangesAsync();
+                var userFromDb = await dbContext.UserAccounts.AddAsync(user);
+                await dbContext.SaveChangesAsync();
 
                 return userFromDb.Entity.UserAccountId;
             }
@@ -35,13 +36,15 @@ namespace AuthApi.DataBaseOperations.Commands.UserAccountsCommands
 
         public async Task<IResult> DeleteUser(string userId)
         {
-            await _context.UserAccounts.Where(x => x.UserAccountId == userId).ExecuteDeleteAsync();
+            using var dbContext = await _context.CreateDbContextAsync();
+            await dbContext.UserAccounts.Where(x => x.UserAccountId == userId).ExecuteDeleteAsync();
             return Results.Ok("User deleted");
         }
 
         public async Task<IResult> UpdateUser(UserAccountDto userAccountDto)
         {
-            await _context.UserAccounts.Where(x => x.UserAccountId == userAccountDto.UserAccountId).ExecuteUpdateAsync(
+            using var dbContext = await _context.CreateDbContextAsync();
+            await dbContext.UserAccounts.Where(x => x.UserAccountId == userAccountDto.UserAccountId).ExecuteUpdateAsync(
                 x => x.SetProperty(x => x.UserName, x => userAccountDto.UserName)
                 .SetProperty(x => x.IsActive, x => userAccountDto.IsActive)
                 .SetProperty(x => x.Email, x => userAccountDto.Email)
@@ -53,7 +56,8 @@ namespace AuthApi.DataBaseOperations.Commands.UserAccountsCommands
 
         public async Task<IResult> UpdatePassword(UserPasswordChange userPasswordChange)
         {
-            await _context.UserAccounts.Where(x => x.UserAccountId == userPasswordChange.UserAccountId).ExecuteUpdateAsync(
+            using var dbContext = await _context.CreateDbContextAsync();
+            await dbContext.UserAccounts.Where(x => x.UserAccountId == userPasswordChange.UserAccountId).ExecuteUpdateAsync(
                 x => x.SetProperty(x => x.PasswordHash, x => userPasswordChange.PasswordHash)
                );
 
