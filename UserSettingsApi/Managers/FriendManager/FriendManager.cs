@@ -200,6 +200,53 @@ namespace UserSettingsApi.Managers.FriendsListsManager
             }
         }
 
+        public async Task<IResult> RemoveFriend(string friendId)
+        {
+            try
+            {
+                var userId = _userAccessor.UserId;
+                var userProperties = await _authenticationService.GetAccountProperties(userId);
+
+                if (userProperties == null)
+                {
+                    return Results.Problem("User does not exist!");
+                }
+
+                if (!userProperties.IsActive)
+                {
+                    return Results.Problem("User is inactive!");
+                }
+
+                var friendProperties = await _authenticationService.GetAccountProperties(friendId);
+
+                if (friendProperties == null)
+                {
+                    return Results.Problem("User does not exist!");
+                }
+
+                var friendsListIdRequestor = await _friendsListRepository.GetFriendsListId(userProperties.UserAccountId);
+
+                await _friendListCommands.RemoveFriend(friendsListIdRequestor, friendProperties.UserAccountId);
+
+                var friendsListIdFriend = await _friendsListRepository.GetFriendsListId(friendProperties.UserAccountId);
+
+
+                await _friendListCommands.RemoveFriend(friendsListIdFriend, userProperties.UserAccountId);
+
+                return Results.Ok("Friend has been removed!");
+
+            }
+            catch(ArgumentNullException ex)
+            {
+                return Results.Problem("Argument null excetion", ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+
+        }
+
         public async Task<IResult> CreateFriendsListTable(string userId)
         {
             try

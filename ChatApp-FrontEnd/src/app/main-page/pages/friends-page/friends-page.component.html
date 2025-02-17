@@ -14,7 +14,10 @@
         buttonType="chat"
         (select)="onChatRoute(item.userAccountId)"
       />
-      <app-tiny-button-component buttonType="delete" />
+      <app-tiny-button-component
+        buttonType="delete"
+        (select)="onFriendRemove(item.userAccountId)"
+      />
     </app-tiny-item-component>
     }
   </div>

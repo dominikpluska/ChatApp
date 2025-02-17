@@ -30,6 +30,8 @@ namespace UserSettingsApi
             app.MapPost("/SentFriendRequest/{userId}", async (string userId) => await friendManager.SendFriendRequests(userId));
             app.MapPost("/CreateFriendsListTable/{userId}", async (string userId) => await friendManager.CreateFriendsListTable(userId));
             app.MapPut("/AcceptFriendRequest/{requestId}", async (string requestId) => await friendManager.AcceptFriendRequest(requestId));
+            app.MapDelete("/RemoveFriend/{friendId}", async (string friendId) => await friendManager.RemoveFriend(friendId));
+
             return app;
         }
 

@@ -3,7 +3,6 @@ import { inject, Injectable } from '@angular/core';
 import { userSettingsApi } from '../apipath';
 import { catchError, throwError } from 'rxjs';
 import { UserLight } from '../../models/userlight.model';
-import { error } from 'console';
 
 @Injectable({ providedIn: 'root' })
 export class FriendsListService {
@@ -34,6 +33,17 @@ export class FriendsListService {
   approveFriendRequest(requestId: string) {
     return this.htppClient
       .put(`${userSettingsApi}AcceptFriendRequest/${requestId}`, null)
+      .pipe(
+        catchError((error) => {
+          const errorMessage = error.error.detail;
+          return throwError(() => new Error(errorMessage));
+        })
+      );
+  }
+
+  removeFriend(friendId: string) {
+    return this.htppClient
+      .delete(`${userSettingsApi}RemoveFriend/${friendId}`)
       .pipe(
         catchError((error) => {
           const errorMessage = error.error.detail;

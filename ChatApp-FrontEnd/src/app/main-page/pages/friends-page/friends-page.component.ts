@@ -5,6 +5,7 @@ import { FriendsListService } from '../../../services/api-calls/friendslists.ser
 import { UserSettings } from '../../../services/usersettings.service';
 import { NothingToDisplayComponent } from '../../../global-components/nothing-to-display/nothing-to-display.component';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-friends-page',
@@ -22,6 +23,7 @@ export class FriendsPageComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private userSettings = inject(UserSettings);
   private router = inject(Router);
+  private toastr = inject(ToastrService);
 
   //Implement a friends list to the userSettings using friend model
 
@@ -45,5 +47,19 @@ export class FriendsPageComponent implements OnInit {
 
   onChatRoute(userId: string) {
     this.router.navigate(['main/chat', { chatId: userId }]);
+  }
+
+  onFriendRemove(friendId: string) {
+    const subscription = this.friendsListService
+      .removeFriend(friendId)
+      .subscribe({
+        next: (response) => {
+          this.toastr.success(response.toString());
+        },
+        error: (error) => {
+          this.toastr.error(error.toString());
+        },
+      });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 }

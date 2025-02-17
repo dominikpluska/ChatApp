@@ -8,5 +8,6 @@ namespace UserSettingsApi.Managers.FriendsListsManager
         public Task<IResult> SendFriendRequests(string friendId);
         public Task<IResult> GetFriendsList();
         public Task<IResult> AcceptFriendRequest(string requestId);
+        public Task<IResult> RemoveFriend(string friendId);
     }
 }
