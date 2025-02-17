@@ -10,7 +10,10 @@
       name="{{ item.userName }}"
       componentId="{{ item.userAccountId }}"
     >
-      <app-tiny-button-component buttonType="delete" />
+      <app-tiny-button-component
+        buttonType="delete"
+        (select)="onRemoveFromBlackList(item.userAccountId)"
+      />
     </app-tiny-item-component>
     }
   </div>

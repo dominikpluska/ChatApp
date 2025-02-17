@@ -188,6 +188,8 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                 var friendListRequestor = await _friendsListRepository.GetFriendsList(friendRequest.RequestorId);
                 await _friendListCommands.AddNewFriend(friendListRequestor.FriendsListId, friendRequest.RequesteeId);
 
+                await _friendRequestCommands.DeleteRequest(requestIdParsed);
+
                 return Results.Ok("Friend Request has been accepted!");
             }
             catch(ArgumentNullException ex)
@@ -195,6 +197,43 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                 return Results.Problem("Argument Null exception!", ex.Message);
             }
             catch(Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        }
+
+        public async Task<IResult> RejectFriendRequest(string requestId)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(requestId);
+
+                var requestIdParsed = ObjectId.Parse(requestId);
+
+                var userId = _userAccessor.UserId;
+                var userProperties = await _authenticationService.GetAccountProperties(userId);
+
+                if (userProperties == null)
+                {
+                    return Results.Problem("User does not exist!");
+                }
+
+                if (!userProperties.IsActive)
+                {
+                    return Results.Problem("User is inactive!");
+                }
+
+                var friendRequest = await _requestsRepository.GetRequest(requestIdParsed);
+
+                await _friendRequestCommands.DeleteRequest(friendRequest.RequestId);
+
+                return Results.Ok("Friend request has been rejected!");
+            }
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem("Argument Null exception!", ex.Message);
+            }
+            catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
             }

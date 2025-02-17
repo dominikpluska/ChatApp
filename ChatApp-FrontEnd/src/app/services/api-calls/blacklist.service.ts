@@ -24,7 +24,18 @@ export class BlackListService {
       .post(`${userSettingsApi}AddToBlackList/${blockedId}`, null)
       .pipe(
         catchError((error) => {
-          const errorMessage = error.status;
+          const errorMessage = error.error.detail;
+          return throwError(() => new Error(errorMessage));
+        })
+      );
+  }
+
+  removeUserFromBlackList(blockedId: string) {
+    return this.htppClient
+      .delete(`${userSettingsApi}RemoveFromBlackList/${blockedId}`)
+      .pipe(
+        catchError((error) => {
+          const errorMessage = error;
           return throwError(() => new Error(errorMessage));
         })
       );

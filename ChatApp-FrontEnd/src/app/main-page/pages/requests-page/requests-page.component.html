@@ -17,7 +17,10 @@
         buttonType="approve"
         (select)="approveRequest(item.requestId)"
       />
-      <app-tiny-button-component buttonType="delete" />
+      <app-tiny-button-component
+        buttonType="delete"
+        (select)="rejectRequest(item.requestId)"
+      />
       }
     </app-tiny-item-component>
     }

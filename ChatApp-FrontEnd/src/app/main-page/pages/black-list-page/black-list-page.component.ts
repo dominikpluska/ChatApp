@@ -4,6 +4,7 @@ import { UserSettings } from '../../../services/usersettings.service';
 import { NothingToDisplayComponent } from '../../../global-components/nothing-to-display/nothing-to-display.component';
 import { TinyItemComponentComponent } from '../../../global-components/tiny-item-component/tiny-item-component.component';
 import { TinyButtonComponentComponent } from '../../../global-components/tiny-button-component/tiny-button-component.component';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-black-list-page',
@@ -20,6 +21,7 @@ export class BlackListPageComponent {
   private blackListService = inject(BlackListService);
   private destroyRef = inject(DestroyRef);
   private userSettings = inject(UserSettings);
+  private toastr = inject(ToastrService);
 
   ngOnInit(): void {
     if (this.userSettings.getBlackList == undefined) {
@@ -33,6 +35,20 @@ export class BlackListPageComponent {
       });
       this.destroyRef.onDestroy(() => subscription.unsubscribe());
     }
+  }
+
+  onRemoveFromBlackList(blockedId: string) {
+    const subscription = this.blackListService
+      .removeUserFromBlackList(blockedId)
+      .subscribe({
+        next: (response) => {
+          this.toastr.success(response.toString());
+        },
+        error: (error) => {
+          this.toastr.error(error.toString());
+        },
+      });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
   get getUserSettings() {

@@ -57,5 +57,27 @@ namespace UserSettingsApi.DatabaseOperations.Commands.BlackListCommands
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<IResult> RemoveFromBlackList(ObjectId blackListId, string userId)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(userId);
+
+                var filter = Builders<BsonDocument>.Filter.Eq("_id", blackListId);
+                var delete = Builders<BsonDocument>.Update.Pull("BlockedAccounts", userId);
+
+                var result = await _mongoDbService.BlackListsCollectionBson.UpdateOneAsync(filter, delete);
+                return Results.Ok(result);
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

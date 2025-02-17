@@ -20,7 +20,7 @@ namespace UserSettingsApi
             app.MapGet("/GetBlackList", async () => await blackListsManager.GetBlackList());
             app.MapPost("/CreateBlackListTable/{userId}", async (string userId) => await blackListsManager.CreateBlackListTable(userId));
             app.MapPost("/AddToBlackList/{blockedId}", async (string blockedId) => await blackListsManager.AddUserToBlackList(blockedId));
-
+            app.MapDelete("/RemoveFromBlackList/{blockedId}", async (string blockedId) => await blackListsManager.RemoveFromBlackList(blockedId));
             return app;
         }
 
@@ -31,6 +31,7 @@ namespace UserSettingsApi
             app.MapPost("/CreateFriendsListTable/{userId}", async (string userId) => await friendManager.CreateFriendsListTable(userId));
             app.MapPut("/AcceptFriendRequest/{requestId}", async (string requestId) => await friendManager.AcceptFriendRequest(requestId));
             app.MapDelete("/RemoveFriend/{friendId}", async (string friendId) => await friendManager.RemoveFriend(friendId));
+            app.MapDelete("/RejectFriendRequest/{requestId}", async (string requestId) => await friendManager.RejectFriendRequest(requestId));
 
             return app;
         }

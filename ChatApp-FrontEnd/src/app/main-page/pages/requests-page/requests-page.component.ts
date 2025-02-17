@@ -40,9 +40,22 @@ export class RequestsPageComponent implements OnInit {
   }
 
   approveRequest(requestId: string) {
-    console.log(requestId);
     const subscription = this.friendsListService
       .approveFriendRequest(requestId)
+      .subscribe({
+        next: (response) => {
+          this.tastr.success(response.toString());
+        },
+        error: (error) => {
+          this.tastr.error(error.toString());
+        },
+      });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
+  rejectRequest(requestId: string) {
+    const subscription = this.friendsListService
+      .rejectFriendRequest(requestId)
       .subscribe({
         next: (response) => {
           this.tastr.success(response.toString());

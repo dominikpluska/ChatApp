@@ -41,6 +41,17 @@ export class FriendsListService {
       );
   }
 
+  rejectFriendRequest(requestId: string) {
+    return this.htppClient
+      .delete(`${userSettingsApi}RejectFriendRequest/${requestId}`)
+      .pipe(
+        catchError((error) => {
+          const errorMessage = error.error.detail;
+          return throwError(() => new Error(errorMessage));
+        })
+      );
+  }
+
   removeFriend(friendId: string) {
     return this.htppClient
       .delete(`${userSettingsApi}RemoveFriend/${friendId}`)
