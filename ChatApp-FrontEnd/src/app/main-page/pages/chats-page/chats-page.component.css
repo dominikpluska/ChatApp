@@ -3,7 +3,7 @@
 }
 
 .sub-container {
-  @apply h-3/4 overflow-y-auto;
+  @apply lg:h-3/4 2xl:h-5/6 overflow-y-auto;
 }
 
 p {

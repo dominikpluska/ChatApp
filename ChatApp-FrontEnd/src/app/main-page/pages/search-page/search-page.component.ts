@@ -8,7 +8,9 @@ import {
 import { SearchService } from '../../../services/api-calls/search.service';
 import { TinyItemComponentComponent } from '../../../global-components/tiny-item-component/tiny-item-component.component';
 import { TinyButtonComponentComponent } from '../../../global-components/tiny-button-component/tiny-button-component.component';
-import { BlockList } from 'net';
+import { FriendsListService } from '../../../services/api-calls/friendslists.service';
+import { BlackListService } from '../../../services/api-calls/blacklist.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-search-page',
@@ -25,8 +27,11 @@ export class SearchPageComponent implements OnInit {
   private submitted: boolean = false;
   private isSearched: boolean = false;
   private searchService = inject(SearchService);
+  private friendsListService = inject(FriendsListService);
+  private blackListService = inject(BlackListService);
   private destroyRef = inject(DestroyRef);
   private currentPaginationSelection = 1;
+  private router = inject(Router);
 
   //implement adding and blocking users from this view
   //implement chat route
@@ -141,5 +146,40 @@ export class SearchPageComponent implements OnInit {
       },
     });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
+  onSendFriendRequest(userId: string) {
+    const subscription = this.friendsListService
+      .sendFriendRequest(userId)
+      .subscribe({
+        next: (response) => {
+          console.log(response);
+        },
+        error: (error) => {
+          console.log(error);
+        },
+      });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
+  onUserBlock(userId: string) {
+    const subscription = this.blackListService
+      .addUserToBlackList(userId)
+      .subscribe({
+        next: (response) => {
+          console.log(response);
+        },
+        error: (error) => {
+          console.log(error);
+        },
+      });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
+  //modify this method!
+  //this method must reach out to the chats database to search for the chat id and then route it to the correct path
+  //if chat does not exist, the backend should create one and return its id
+  onChatRoute(userId: string) {
+    this.router.navigate(['main/chat', { chatId: userId }]);
   }
 }

@@ -2,6 +2,7 @@
 using System.Text;
 using UserSettingsApi.Dto;
 using UserSettingsApi.UserAccessor;
+using MongoDB.Bson;
 
 
 namespace UserSettingsApi.Services
@@ -22,45 +23,68 @@ namespace UserSettingsApi.Services
 
         public async Task Authorize(HttpContext httpContext)
         {
-            var result = await ApiOperation(httpContext, $"{_authApi}/AuthCheck");
+            var client = CreateHttpClient();
+            var response = await client.GetAsync($"{_authApi}/AuthCheck");
         }
 
         public async Task<string> GetUser(string userName)
         {
-            if (userName == null)
-            {
-                throw new ArgumentNullException("UserName was null!");
-            }
-            var result = await ApiOperation(userName!, $"{_authApi}/GetUser?userName={userName}");
-            return result.ToString()!;
+            ArgumentNullException.ThrowIfNull(userName);
+
+            var client = CreateHttpClient();
+            var response = await client.GetAsync($"{_authApi}/GetUser?userName={userName}");
+            var apiContent = await ReadApiContent(response);
+
+            var deserializedContent = JsonSerializer.Deserialize<string>(apiContent);
+
+            return deserializedContent!;
+        }
+
+        public async Task<IEnumerable<UserAccountLightDto>> GetUserListByIds(IdRequestsDto idRequestsDto)
+        {
+            ArgumentNullException.ThrowIfNull(idRequestsDto);
+
+            var client =  CreateHttpClient();
+            var jsonContent = JsonSerializer.Serialize(idRequestsDto);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync($"{_authApi}/GetUserListByIds", content);
+            var apiContent = await ReadApiContent(response);
+
+            var deserializedContent = JsonSerializer.Deserialize<IEnumerable<UserAccountLightDto>>(apiContent);
+
+            return deserializedContent!;
         }
 
         public async Task<UserAccountDto> GetAccountProperties(string userId)
         {
-            if (userId == null)
-            {
-                throw new ArgumentNullException("UserId was null!");
-            }
-            var result = await ApiOperation(userId!, $"{_authApi}/GetAccountProperties?userId={userId}");
+            ArgumentNullException.ThrowIfNull(userId);
+            var client = CreateHttpClient();
 
-            var userAccountDto = JsonSerializer.Deserialize<UserAccountDto>(result.ToString()!);
+            var response = await client.GetAsync($"{_authApi}/GetAccountProperties?userId={userId}");
+            var apiContent = await ReadApiContent(response);
+
+
+            var userAccountDto = JsonSerializer.Deserialize<UserAccountDto>(apiContent.ToString()!);
 
             return userAccountDto!;
         }
 
-        private async Task<object> ApiOperation(object data, string apiPath)
+        private static async Task<string> ReadApiContent(HttpResponseMessage response)
         {
-            var jsonLog = JsonSerializer.Serialize(data);
-            var content = new StringContent(jsonLog, Encoding.UTF8, "application/json");
+            response.EnsureSuccessStatusCode();
+            var apiContent = await response.Content.ReadAsStringAsync();
 
+            return apiContent;
+        }
+
+        private HttpClient CreateHttpClient()
+        {
             var client = _httpClientFactory.CreateClient("Auth");
             client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _userAccessor.TokenString);
 
-            var response = await client.GetAsync(apiPath);
-            response.EnsureSuccessStatusCode();
+            return client;
 
-            var apiContent = await response.Content.ReadAsStringAsync();
-            return apiContent;
         }
     }
 }

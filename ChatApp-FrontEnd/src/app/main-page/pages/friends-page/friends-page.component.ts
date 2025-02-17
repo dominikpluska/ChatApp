@@ -4,6 +4,7 @@ import { TinyButtonComponentComponent } from '../../../global-components/tiny-bu
 import { FriendsListService } from '../../../services/api-calls/friendslists.service';
 import { UserSettings } from '../../../services/usersettings.service';
 import { NothingToDisplayComponent } from '../../../global-components/nothing-to-display/nothing-to-display.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-friends-page',
@@ -20,6 +21,7 @@ export class FriendsPageComponent implements OnInit {
   private friendsListService = inject(FriendsListService);
   private destroyRef = inject(DestroyRef);
   private userSettings = inject(UserSettings);
+  private router = inject(Router);
 
   //Implement a friends list to the userSettings using friend model
 
@@ -27,7 +29,6 @@ export class FriendsPageComponent implements OnInit {
     if (this.userSettings.getFriendsList == undefined) {
       const subscription = this.friendsListService.getFriendsList().subscribe({
         next: (response) => {
-          console.log(response);
           this.userSettings.setFriendsList = response;
         },
         error: (error) => {
@@ -40,5 +41,9 @@ export class FriendsPageComponent implements OnInit {
 
   get getUserSettings() {
     return this.userSettings;
+  }
+
+  onChatRoute(userId: string) {
+    this.router.navigate(['main/chat', { chatId: userId }]);
   }
 }

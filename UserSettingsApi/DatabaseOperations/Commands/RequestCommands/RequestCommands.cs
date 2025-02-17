@@ -6,21 +6,21 @@ using UserSettingsApi.Models;
 
 namespace UserSettingsApi.DatabaseOperations.Commands.FriendRequestCommands
 {
-    public class FriendRequestCommands : IFriendRequestCommands
+    public class RequestCommands : IRequestCommands
     {
         private readonly MongoDBService _mongoDBService;
 
-        public FriendRequestCommands(MongoDBService mongoDBService)
+        public RequestCommands(MongoDBService mongoDBService)
         {
             _mongoDBService = mongoDBService;
         }
 
-        public async Task<IResult> InsertFriendRequests(Request friendRequest)
+        public async Task<IResult> InsertRequests(Request request)
         {
             try
             {
-                ArgumentNullException.ThrowIfNull(friendRequest);
-                await _mongoDBService.RequestsCollection.InsertOneAsync(friendRequest);
+                ArgumentNullException.ThrowIfNull(request);
+                await _mongoDBService.RequestsCollection.InsertOneAsync(request);
                 return Results.Ok("Friend request has been sent");
             }
             catch (ArgumentNullException ex)
@@ -33,13 +33,13 @@ namespace UserSettingsApi.DatabaseOperations.Commands.FriendRequestCommands
             }
         }
 
-        public async Task<IResult> DeleteFriendRequest(ObjectId friendRequestId)
+        public async Task<IResult> DeleteRequest(ObjectId requestId)
         {
             try
             {
-                ArgumentNullException.ThrowIfNull(friendRequestId);
+                ArgumentNullException.ThrowIfNull(requestId);
 
-                var filter = Builders<Request>.Filter.Eq(x => x.RequestId, friendRequestId);
+                var filter = Builders<Request>.Filter.Eq(x => x.RequestId, requestId);
                 await _mongoDBService.RequestsCollection.DeleteOneAsync(filter);
 
                 return Results.Ok("Friend request has been sent");
@@ -54,13 +54,13 @@ namespace UserSettingsApi.DatabaseOperations.Commands.FriendRequestCommands
             }
         }
 
-        public async Task<IResult> AcceptFriendRequest(ObjectId friendRequestId)
+        public async Task<IResult> AcceptRequest(ObjectId requestId)
         {
             try
             {
-                ArgumentNullException.ThrowIfNull(friendRequestId);
+                ArgumentNullException.ThrowIfNull(requestId);
 
-                var filter = Builders<Request>.Filter.Eq(x => x.RequestId, friendRequestId);
+                var filter = Builders<Request>.Filter.Eq(x => x.RequestId, requestId);
                 var update = Builders<Request>.Update.Set(x => x.IsAccepted, true);
 
                 await _mongoDBService.RequestsCollection.UpdateOneAsync(filter, update);

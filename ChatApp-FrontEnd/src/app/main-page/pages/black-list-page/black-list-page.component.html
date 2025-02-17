@@ -5,9 +5,11 @@
   <app-nothing-to-display />
   } @else {
   <div class="sub-container">
-    @for(item of getUserSettings.getChatsList; track item){
-    <app-tiny-item-component name="{{ item }}" componentId="{{ item }}">
-      <app-tiny-button-component buttonType="chat" />
+    @for(item of getUserSettings.getBlackList; track item){
+    <app-tiny-item-component
+      name="{{ item.userName }}"
+      componentId="{{ item.userAccountId }}"
+    >
       <app-tiny-button-component buttonType="delete" />
     </app-tiny-item-component>
     }

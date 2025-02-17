@@ -7,10 +7,13 @@
   <div class="sub-container">
     @for(item of getUserSettings.getFriendsList; track item){
     <app-tiny-item-component
-      name="{{ item.userId }}"
-      componentId="{{ item.userId }}"
+      name="{{ item.userName }}"
+      componentId="{{ item.userAccountId }}"
     >
-      <app-tiny-button-component buttonType="chat" />
+      <app-tiny-button-component
+        buttonType="chat"
+        (select)="onChatRoute(item.userAccountId)"
+      />
       <app-tiny-button-component buttonType="delete" />
     </app-tiny-item-component>
     }

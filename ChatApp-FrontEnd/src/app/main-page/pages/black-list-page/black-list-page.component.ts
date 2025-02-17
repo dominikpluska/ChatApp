@@ -25,8 +25,7 @@ export class BlackListPageComponent {
     if (this.userSettings.getBlackList == undefined) {
       const subscription = this.blackListService.getBlackList().subscribe({
         next: (response) => {
-          console.log(response);
-          this.userSettings.setChatsList = response;
+          this.userSettings.setBlackList = response;
         },
         error: (error) => {
           console.log(error);

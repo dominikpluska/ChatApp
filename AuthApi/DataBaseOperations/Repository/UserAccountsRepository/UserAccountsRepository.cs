@@ -50,6 +50,25 @@ namespace AuthApi.DataBaseOperations.Repository.UserAccountsRepository
             return _mapper.Map<UserAccount>(result);
         }
 
+        public async Task<IEnumerable<UserAccount>> SelectUsersFromIdList(IEnumerable<string> listOfIds)
+        {
+            try
+            {
+                using var dbContext = await _context.CreateDbContextAsync();
+                var results = await dbContext.UserAccounts.Where(x => listOfIds.Contains(x.UserAccountId)).ToListAsync();
+
+                return results;
+            }
+            catch(ArgumentNullException ex)
+            {
+                throw new ArgumentNullException("Argument null exception!", ex.Message);
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task<IEnumerable<UserAccountDto>> GetAllActiveUsers()
         {
             using var dbContext = await _context.CreateDbContextAsync();

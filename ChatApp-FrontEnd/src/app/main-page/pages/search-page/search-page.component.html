@@ -21,9 +21,18 @@
       name="{{ user.userName }}"
       componentId="{{ user.userAccountId }}"
     >
-      <app-tiny-button-component buttonType="chat" />
-      <app-tiny-button-component buttonType="friend" />
-      <app-tiny-button-component buttonType="block" />
+      <app-tiny-button-component
+        buttonType="chat"
+        (select)="onChatRoute(user.userAccountId)"
+      />
+      <app-tiny-button-component
+        buttonType="friend"
+        (select)="onSendFriendRequest(user.userAccountId)"
+      />
+      <app-tiny-button-component
+        buttonType="block"
+        (select)="onUserBlock(user.userAccountId)"
+      />
     </app-tiny-item-component>
     }
   </div>

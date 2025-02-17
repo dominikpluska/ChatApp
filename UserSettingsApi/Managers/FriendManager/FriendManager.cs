@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using UserSettingsApi.DatabaseOperations.Commands.FriendRequestCommands;
 using UserSettingsApi.DatabaseOperations.Commands.FriendsLisiCommands;
+using UserSettingsApi.DatabaseOperations.Repository.BlackListRepository;
 using UserSettingsApi.DatabaseOperations.Repository.FriendRequestsRepository;
 using UserSettingsApi.DatabaseOperations.Repository.FriendsListRepository;
 using UserSettingsApi.Dto;
@@ -16,22 +17,21 @@ namespace UserSettingsApi.Managers.FriendsListsManager
         private readonly IFriendListCommands _friendListCommands;
         private readonly IFriendsListRepository _friendsListRepository;
         private readonly IAuthenticationService _authenticationService;
-        private readonly IFriendRequestCommands _friendRequestCommands;
-        private readonly IRequestsRepository _friendRequestsRepository;
-
+        private readonly IRequestCommands _friendRequestCommands;
+        private readonly IRequestsRepository _requestsRepository;
+        private readonly IBlackListRepository _blackListRepository;
         public FriendManager(IUserAccessor userAccessor, IFriendListCommands friendListCommands, 
             IFriendsListRepository friendsListRepository, IAuthenticationService authenticationService,
-            IFriendRequestCommands friendRequestCommands, IRequestsRepository friendRequestsRepository)
+            IRequestCommands friendRequestCommands, IRequestsRepository requestsRepository, IBlackListRepository blackListRepository)
         {
             _userAccessor = userAccessor;
             _friendListCommands = friendListCommands;
             _friendsListRepository = friendsListRepository;
             _authenticationService = authenticationService;
             _friendRequestCommands = friendRequestCommands;
-            _friendRequestsRepository = friendRequestsRepository;
+            _requestsRepository = requestsRepository;
+            _blackListRepository = blackListRepository;
         }
-
-        //Must be modified!
         public async Task<IResult> GetFriendsList()
         {
             try
@@ -51,18 +51,15 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 var result = await _friendsListRepository.GetFriendsList(userProperties.UserAccountId);
 
-                // transform results, reach out to the Auth SQL database and download usernames based on userIDs
-                // If entity framework can't do it then use Dapper
-                //From this point on, the rest of this function is only for the testing purposes
-
-                List<FriendsListDto> friendsListDto = new();
-
-                foreach(var friend in result.Friends)
+                IdRequestsDto idRequestsDtos = new()
                 {
-                    friendsListDto.Add(new FriendsListDto { UserId = friend});
-                }
+                    Ids = result.Friends
+                };
 
-                return Results.Ok(friendsListDto);
+                var friendList = await _authenticationService.GetUserListByIds(idRequestsDtos);
+
+
+                return Results.Ok(friendList);
             }
             catch (Exception ex)
             {
@@ -106,7 +103,36 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                     return Results.Problem("User is inactive!");
                 }
 
-                //Check if user is already on the friend list
+                var blackListIdUser = await _blackListRepository.GetBlackListId(userProperties.UserAccountId);
+                var isOnUserList = await _blackListRepository.GetBlockedUser(blackListIdUser, newFriendProperties.UserAccountId);
+
+                if (isOnUserList != null)
+                {
+                    return Results.Problem("User is already on the black list! Remove them to continue the operation");
+                }
+
+                var blackListIdFriend = await _blackListRepository.GetBlackListId(newFriendProperties.UserAccountId);
+                var isOnFriendList = await _blackListRepository.GetBlockedUser(blackListIdFriend, userProperties.UserAccountId);
+
+
+                if (isOnFriendList != null)
+                {
+                    return Results.Problem("This user is currently blocking you! Operation aborted!");
+                }
+
+                var checkRequest = await _requestsRepository.GetRequest(userProperties.UserAccountId, newFriendProperties.UserAccountId);
+
+                if (checkRequest != null)
+                {
+                    return Results.Problem("You have already sent a friend request to this user!");
+                }
+
+                var checkRequest2 = await _requestsRepository.GetRequest(newFriendProperties.UserAccountId, userProperties.UserAccountId);
+
+                if (checkRequest2 != null)
+                {
+                    return Results.Problem("You already have a friend request pending from this user! Please check your requests list!");
+                }
 
                 Request friendRequest = new()
                 {
@@ -115,7 +141,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 };
 
-                await _friendRequestCommands.InsertFriendRequests(friendRequest);
+                await _friendRequestCommands.InsertRequests(friendRequest);
 
                 return Results.Ok("Friend requests has been sent!");
             }
@@ -146,14 +172,14 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                     return Results.Problem("User is inactive!");
                 }
 
-                var friendRequest = await _friendRequestsRepository.GetRequests(requestIdParsed);
+                var friendRequest = await _requestsRepository.GetRequest(requestIdParsed);
 
                 if(friendRequest.RequesteeId != userId)
                 {
                     return Results.Problem("User Id does not match the one saved in the database!");
                 }
 
-                await _friendRequestCommands.AcceptFriendRequest(friendRequest.RequestId);
+                await _friendRequestCommands.AcceptRequest(friendRequest.RequestId);
 
 
                 var friendListRequestee = await _friendsListRepository.GetFriendsList(userId);

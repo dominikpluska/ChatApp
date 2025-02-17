@@ -8,5 +8,7 @@ namespace UserSettingsApi.Services
         public Task<string> GetUser(string userName);
 
         public Task<UserAccountDto> GetAccountProperties(string userId);
+
+        public Task<IEnumerable<UserAccountLightDto>> GetUserListByIds(IdRequestsDto idRequestsDto);
     }
 }

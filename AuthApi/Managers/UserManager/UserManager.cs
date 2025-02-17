@@ -362,5 +362,33 @@ namespace AuthApi.Managers.UserManager
                 return Results.Problem(ex.Message);
             }
         }
+
+        public async Task<IResult> PostUserListByIds(IEnumerable<string> Ids)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(Ids);
+
+                if(!Ids.Any())
+                {
+                    return Results.Problem("The list is empty!");
+                }
+
+                var list = await _userAccountsRepository.SelectUsersFromIdList(Ids);
+
+                List<UserAccountLightDto> userAccountLightDto = new();
+                var mappedList = _mapper.Map(list, userAccountLightDto);
+
+                return Results.Ok(mappedList);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        }
     }
 }

@@ -19,6 +19,8 @@ namespace UserSettingsApi
         {
             app.MapGet("/GetBlackList", async () => await blackListsManager.GetBlackList());
             app.MapPost("/CreateBlackListTable/{userId}", async (string userId) => await blackListsManager.CreateBlackListTable(userId));
+            app.MapPost("/AddToBlackList/{blockedId}", async (string blockedId) => await blackListsManager.AddUserToBlackList(blockedId));
+
             return app;
         }
 

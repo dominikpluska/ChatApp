@@ -1,13 +1,15 @@
-<button class="mx-2">
+<button class="mx-2" (click)="onClick()">
   @if(buttonType() == 'chat') {
   <i class="bi bi-chat-dots-fill"></i>
   } @else if(buttonType() == 'delete'){
   <i class="bi bi-x"></i>
   } @else if(buttonType() == 'accepted'){
-  <i class="bi bi-person-check-fill bg-green-400"></i>
+  <i class="bi bi-person-check-fill text-green-400"></i>
   } @else if (buttonType() === 'friend') {
   <i class="bi bi-person-add"></i>
   } @else if(buttonType() === 'block'){
   <i class="bi bi-person-fill-dash text-red-500"></i>
+  } @else if(buttonType() === 'approve'){
+  <i class="bi bi-check-lg"></i>
   }
 </button>

@@ -6,5 +6,7 @@ namespace UserSettingsApi.Managers.BlackListsManager
     {
         public Task<IResult> CreateBlackListTable(string userId);
         public Task<IResult> GetBlackList();
+
+        public Task<IResult> AddUserToBlackList(string blockedUserId);
     }
 }

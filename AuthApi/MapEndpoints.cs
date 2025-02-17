@@ -19,6 +19,7 @@ namespace AuthApi
             app.MapGet("/GetActiveUserList", async () => await userManager.GetActiveUserList());
             app.MapGet("/GetActiveUserList/s={itemsToSkip}", async (int itemsToSkip) => await userManager.GetActiveUserList(itemsToSkip));
             app.MapGet("/Search/{userName}", async (string userName) => await userManager.SearchForUser(userName));
+            app.MapPost("/GetUserListByIds", async (IdRequestsDto IdRequests) => await userManager.PostUserListByIds(IdRequests.Ids));
 
             return app;
         }

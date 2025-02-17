@@ -38,6 +38,7 @@ export class NavbarComponentComponent {
       next: (response) => {
         this.isOptionsButtonActive = false;
         this.router.navigate(['/', 'login']);
+        window.location.reload();
       },
       error: (error) => {
         console.log(error);

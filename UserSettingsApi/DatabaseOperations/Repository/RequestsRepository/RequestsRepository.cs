@@ -14,7 +14,7 @@ namespace UserSettingsApi.DatabaseOperations.Repository.FriendRequestsRepository
             _mongoDBService = mongoDBService;
         }
 
-        public async Task<Request> GetRequests(ObjectId requestId)
+        public async Task<Request> GetRequest(ObjectId requestId)
         {
             try
             {
@@ -29,6 +29,27 @@ namespace UserSettingsApi.DatabaseOperations.Repository.FriendRequestsRepository
                 throw new ArgumentNullException("Argument null exception", ex.Message);
             }
             catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<Request> GetRequest(string requestorId, string requesteeId)
+        {
+            try
+            {
+                var filter = Builders<Request>.Filter.Eq(x => x.RequestorId, requestorId) &
+                             Builders<Request>.Filter.Eq(x => x.RequesteeId, requesteeId);
+
+                var result = await _mongoDBService.RequestsCollection.FindAsync(filter);
+
+                return await result.FirstOrDefaultAsync();
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ArgumentNullException("Argument null exception", ex.Message);
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
@@ -53,5 +74,7 @@ namespace UserSettingsApi.DatabaseOperations.Repository.FriendRequestsRepository
                 throw new Exception(ex.Message);
             }
         }
+
+
     }
 }

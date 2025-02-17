@@ -13,5 +13,6 @@ namespace AuthApi.Managers.UserManager
         public Task<IResult> GetAccountProperties(string userId);
         public Task<IResult> GetActiveUserList(int itemsToSkip = 0);
         public Task<IResult> SearchForUser(string userName);
+        public Task<IResult> PostUserListByIds(IEnumerable<string> Ids);
     }
 }

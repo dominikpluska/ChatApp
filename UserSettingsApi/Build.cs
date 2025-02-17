@@ -41,7 +41,7 @@ namespace UserSettingsApi
             builder.Services.AddScoped<IChatsCommands, ChatsCommands>();
             builder.Services.AddScoped<IFriendListCommands, FriendListCommands>();
             builder.Services.AddScoped<IBlackListCommands, BlackListCommands>();
-            builder.Services.AddScoped<IFriendRequestCommands, FriendRequestCommands>();
+            builder.Services.AddScoped<IRequestCommands, RequestCommands>();
             
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IUserAccessor, HttpUserAccessor>();

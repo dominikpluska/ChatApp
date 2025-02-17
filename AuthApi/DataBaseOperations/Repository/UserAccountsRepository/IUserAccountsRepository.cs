@@ -13,5 +13,6 @@ namespace AuthApi.DataBaseOperations.Repository.UserAccountsRepository
         public Task<int> GetActiveUsersCount();
         public Task<IEnumerable<UserAccount>> GetTopActiveUsersOrderedAlphabetically(int itemsToSkip);
         public Task<IEnumerable<UserAccount>> Search(string userName);
+        public Task<IEnumerable<UserAccount>> SelectUsersFromIdList(IEnumerable<string> listOfIds);
     }
 }

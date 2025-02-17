@@ -13,7 +13,10 @@
       @if(item.isAccepted){
       <app-tiny-button-component buttonType="accepted" />
       } @else {
-      <app-tiny-button-component buttonType="approve" />
+      <app-tiny-button-component
+        buttonType="approve"
+        (select)="approveRequest(item.requestId)"
+      />
       <app-tiny-button-component buttonType="delete" />
       }
     </app-tiny-item-component>

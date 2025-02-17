@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { UserProfile } from '../models/userprofile.model';
-import { Friend } from '../models/friend';
 import { AppRequest } from '../models/apprequest.model';
+import { UserLight } from '../models/userlight.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserSettings {
@@ -10,17 +10,13 @@ export class UserSettings {
     UserName: '',
   };
 
-  private friendsList?: Friend[] | null;
+  private friendsList?: UserLight[] | null;
 
   private chatsList?: string[] | null;
 
-  private blackList?: string[] | null;
+  private blackList?: UserLight[] | null;
 
   private requestsList?: AppRequest[] | null;
-
-  constructor() {
-    //constructor
-  }
 
   setUserProfile(id: string, userName: string) {
     this.userProfile.UserId = id;
@@ -35,7 +31,7 @@ export class UserSettings {
     return this.friendsList;
   }
 
-  set setFriendsList(friends: Friend[]) {
+  set setFriendsList(friends: UserLight[]) {
     this.friendsList = friends;
   }
 
@@ -51,7 +47,7 @@ export class UserSettings {
     return this.blackList;
   }
 
-  set setBlackList(blackList: string[]) {
+  set setBlackList(blackList: UserLight[]) {
     this.blackList = blackList;
   }
 
