@@ -143,7 +143,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 await _friendRequestCommands.InsertRequests(friendRequest);
 
-                return Results.Ok("Friend requests has been sent!");
+                return Results.Ok("Friend request has been sent!");
             }
             catch(Exception ex)
             {

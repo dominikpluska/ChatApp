@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { userSettingsApi } from '../apipath';
 import { catchError, throwError } from 'rxjs';
 import { UserLight } from '../../models/userlight.model';
+import { error } from 'console';
 
 @Injectable({ providedIn: 'root' })
 export class FriendsListService {
@@ -13,8 +14,7 @@ export class FriendsListService {
       .get<UserLight[]>(`${userSettingsApi}GetAllFriends`)
       .pipe(
         catchError((error) => {
-          //console.log(error.status);
-          const errorMessage = error.status;
+          const errorMessage = error.error.detail;
           return throwError(() => new Error(errorMessage));
         })
       );
@@ -25,8 +25,7 @@ export class FriendsListService {
       .post(`${userSettingsApi}SentFriendRequest/${userId}`, null)
       .pipe(
         catchError((error) => {
-          //console.log(error.status);
-          const errorMessage = error.status;
+          const errorMessage = error.error.detail;
           return throwError(() => new Error(errorMessage));
         })
       );
@@ -37,8 +36,7 @@ export class FriendsListService {
       .put(`${userSettingsApi}AcceptFriendRequest/${requestId}`, null)
       .pipe(
         catchError((error) => {
-          //console.log(error.status);
-          const errorMessage = error.status;
+          const errorMessage = error.error.detail;
           return throwError(() => new Error(errorMessage));
         })
       );

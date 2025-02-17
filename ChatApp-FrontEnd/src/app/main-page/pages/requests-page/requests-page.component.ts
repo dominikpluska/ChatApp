@@ -5,6 +5,7 @@ import { TinyButtonComponentComponent } from '../../../global-components/tiny-bu
 import { UserSettings } from '../../../services/usersettings.service';
 import { RequestsService } from '../../../services/api-calls/requests.service';
 import { FriendsListService } from '../../../services/api-calls/friendslists.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-requests-page',
@@ -22,6 +23,7 @@ export class RequestsPageComponent implements OnInit {
   private friendsListService = inject(FriendsListService);
   private destroyRef = inject(DestroyRef);
   private userSettings = inject(UserSettings);
+  private tastr = inject(ToastrService);
 
   ngOnInit(): void {
     if (this.userSettings.getRequestsList == undefined) {
@@ -43,10 +45,10 @@ export class RequestsPageComponent implements OnInit {
       .approveFriendRequest(requestId)
       .subscribe({
         next: (response) => {
-          console.log(response);
+          this.tastr.success(response.toString());
         },
         error: (error) => {
-          console.log(error);
+          this.tastr.error(error.toString());
         },
       });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());

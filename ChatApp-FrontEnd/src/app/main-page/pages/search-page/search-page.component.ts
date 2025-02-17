@@ -11,6 +11,7 @@ import { TinyButtonComponentComponent } from '../../../global-components/tiny-bu
 import { FriendsListService } from '../../../services/api-calls/friendslists.service';
 import { BlackListService } from '../../../services/api-calls/blacklist.service';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-search-page',
@@ -32,6 +33,7 @@ export class SearchPageComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private currentPaginationSelection = 1;
   private router = inject(Router);
+  private tastr = inject(ToastrService);
 
   //implement adding and blocking users from this view
   //implement chat route
@@ -153,10 +155,10 @@ export class SearchPageComponent implements OnInit {
       .sendFriendRequest(userId)
       .subscribe({
         next: (response) => {
-          console.log(response);
+          this.tastr.success(response.toString());
         },
         error: (error) => {
-          console.log(error);
+          this.tastr.error(error.toString());
         },
       });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
@@ -167,10 +169,10 @@ export class SearchPageComponent implements OnInit {
       .addUserToBlackList(userId)
       .subscribe({
         next: (response) => {
-          console.log(response);
+          this.tastr.success(response.toString());
         },
         error: (error) => {
-          console.log(error);
+          this.tastr.error(error.toString());
         },
       });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
