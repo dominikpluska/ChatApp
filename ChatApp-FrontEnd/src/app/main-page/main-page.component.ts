@@ -1,4 +1,4 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, output } from '@angular/core';
 import { SidebarComponentComponent } from './components/sidebar-component/sidebar-component.component';
 import { NavbarComponentComponent } from './components/navbar-component/navbar-component.component';
 import { Router, RouterOutlet } from '@angular/router';

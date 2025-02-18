@@ -93,7 +93,7 @@ app.UseHttpsRedirection();
 using var scope = app.Services.CreateScope();
 var chatManager = scope.ServiceProvider.GetRequiredService<IChatManager>();
 
-app.MapMessagesEndpoints(chatManager);
+app.MapMessagesEndpoints(chatManager).MapHubs();
 app.GenerateDatabase();
 app.Run();
 

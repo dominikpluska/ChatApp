@@ -13,6 +13,7 @@ namespace MessagesApi
         {
             builder.Services.AddHttpClient();
             builder.Services.AddAuthorization();
+            builder.Services.AddSignalR();
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             builder.Services.AddScoped<IChatCommands, ChatCommands>();

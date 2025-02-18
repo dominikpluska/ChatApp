@@ -122,6 +122,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
             }
         } 
 
+        //This method gets wrong top 10 messages. Check what is going on later on!
         public async Task<IEnumerable<Message>> GetChatMessages(ObjectId chatId)
         {
 
@@ -129,7 +130,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
             {
                 new BsonDocument("$match", new BsonDocument("_id", chatId)),
                 new BsonDocument("$unwind", "$Messages"),
-                new BsonDocument("$limit", 10),
+                //new BsonDocument("$limit", 10),
                 new BsonDocument("$project", new BsonDocument
                 {
                     { "_id", 0 },    

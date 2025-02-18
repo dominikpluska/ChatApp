@@ -5,11 +5,13 @@ using MessagesApi.Dto;
 using MessagesApi.Models;
 using MessagesApi.Services;
 using MessagesApi.UserAccessor;
+using Microsoft.AspNetCore.SignalR;
 using MongoDB.Bson;
+using System.Reflection;
 
 namespace MessagesApi.Managers.ChatManager
 {
-    public class ChatManager : IChatManager
+    public class ChatManager : Hub, IChatManager
     {
         private readonly IChatCommands _chatCommands;
         private readonly IChatRepository _chatRepository;
@@ -24,6 +26,11 @@ namespace MessagesApi.Managers.ChatManager
             _chatRepository = chatRepository;
             _userAccessor = userAccessor;
             _mapper = mapper;
+        }
+
+        public override async Task OnConnectedAsync()
+        {
+            await Clients.Caller.SendAsync("Connected to the chat session!");
         }
 
         //Currently working on
@@ -203,7 +210,7 @@ namespace MessagesApi.Managers.ChatManager
 
         //}
 
-        public async Task<IResult> PostMessage(MessageDto messageDto)
+        public async Task PostMessage(MessageDto messageDto)
         {
             try
             {
@@ -214,7 +221,7 @@ namespace MessagesApi.Managers.ChatManager
 
                 if (userProperties == null || !userProperties.IsActive)
                 {
-                    return Results.Problem("User does not exist or is inactive!");
+                    await Clients.Caller.SendAsync(nameof(PostMessage), "User is disabled or incative!");
                 }
                 var chatId = ObjectId.Parse(messageDto.ChatId);
                 var chatParticipants = await _chatRepository.GetChatParticipants(chatId);
@@ -222,7 +229,7 @@ namespace MessagesApi.Managers.ChatManager
                 var getChatParticipant = chatParticipants.Where(x => x == userId).FirstOrDefault();
                 if (getChatParticipant == null)
                 {
-                    return Results.Problem("The user isn't a part of the chat session!");
+                    await Clients.Caller.SendAsync(nameof(PostMessage), "The user isn't a part of the chat session!");
                 }
 
                 Message message = new()
@@ -231,25 +238,33 @@ namespace MessagesApi.Managers.ChatManager
                     TextMessage = messageDto.TextMessage,
                 };
 
-                
                 await _chatCommands.InsertNewMessage(chatId, message);
-                return Results.Ok("OK");
+
+                MessageRetrivedDto messageRetrivedDto = new() ;
+
+                var mappedMessage = _mapper.Map(message, messageRetrivedDto);
+
+                mappedMessage.UserName = userProperties!.UserName;
+
+                await Groups.AddToGroupAsync(_userAccessor.UserId, chatId.ToString());
+
+                await Clients.Group(chatId.ToString()).SendAsync(nameof(PostMessage), mappedMessage);
             }
             catch (ArgumentNullException ex)
             {
-                return Results.Problem("Argument Null Exception!", ex.Message);
+                await Clients.Caller.SendAsync(nameof(PostMessage), "Argument Null Exception!", ex.Message);
 
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                await Clients.Caller.SendAsync(nameof(PostMessage), ex.Message);
             }
         }
 
-        public async Task<IResult> GetMessages(string chatId)
+        public async Task GetMessages(string chatId)
         {
-           try
-           {
+            try
+            {
                 ArgumentNullException.ThrowIfNull(chatId);
                 var chatIdParsed = ObjectId.Parse(chatId);
 
@@ -258,7 +273,7 @@ namespace MessagesApi.Managers.ChatManager
 
                 if (userProperties == null || !userProperties.IsActive)
                 {
-                    return Results.Problem("User does not exist or is inactive!");
+                    await Clients.Caller.SendAsync(nameof(GetMessages), "User is disabled or incative!");
                 }
 
                 var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
@@ -266,14 +281,19 @@ namespace MessagesApi.Managers.ChatManager
 
                 if (checkUser == null)
                 {
-                    return Results.Problem("User is not a chat participant!");
+                    //return Results.Problem("User is not a chat participant!");
+                    await Clients.Caller.SendAsync(nameof(GetMessages), "User is not a chat participant!");
                 }
 
                 var result = await _chatRepository.GetChatMessages(chatIdParsed);
 
+                await Groups.AddToGroupAsync(_userAccessor.UserId, chatId);
+
+                await Clients.Caller.SendAsync(nameof(GetMessages), result);
+
                 List<MessageRetrivedDto> messageRetrivedDtos = new();
 
-                var mappedResults =  _mapper.Map(result, messageRetrivedDtos);
+                var mappedResults = _mapper.Map(result, messageRetrivedDtos);
 
 
                 IdRequestsDto idRequestsDtos = new()
@@ -290,20 +310,78 @@ namespace MessagesApi.Managers.ChatManager
                     return result;
                 }).ToList();
 
+
+                await Clients.Caller.SendAsync(nameof(GetMessages), new { users = userList, messages = mergedList });
+            }
+            catch (ArgumentNullException ex)
+            {
+                await Clients.Caller.SendAsync(nameof(GetMessages), "Argument Null Exception!", ex.Message);
+
+            }
+            catch (Exception ex)
+            {
+                await Clients.Caller.SendAsync(nameof(GetMessages), ex.Message);
+            }
+        }
+
+        //public async Task<IResult> GetMessages(string chatId)
+        //{
+        //   try
+        //   {
+        //        ArgumentNullException.ThrowIfNull(chatId);
+        //        var chatIdParsed = ObjectId.Parse(chatId);
+
+        //        var userId = _userAccessor.UserId;
+        //        var userProperties = await _authenticationService.GetAccountProperties(userId);
+
+        //        if (userProperties == null || !userProperties.IsActive)
+        //        {
+        //            return Results.Problem("User does not exist or is inactive!");
+        //        }
+
+        //        var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
+        //        var checkUser = participants.Where(x => x == userId).FirstOrDefault();
+
+        //        if (checkUser == null)
+        //        {
+        //            return Results.Problem("User is not a chat participant!");
+        //        }
+
+        //        var result = await _chatRepository.GetChatMessages(chatIdParsed);
+
+        //        List<MessageRetrivedDto> messageRetrivedDtos = new();
+
+        //        var mappedResults =  _mapper.Map(result, messageRetrivedDtos);
+
+
+        //        IdRequestsDto idRequestsDtos = new()
+        //        {
+        //            Ids = participants
+        //        };
+
+        //        var userList = await _authenticationService.GetUserListByIds(idRequestsDtos);
+
+        //        var mergedList = mappedResults.GroupJoin(userList, result => result.UserId, user => user.UserAccountId, (result, users) =>
+        //        {
+        //            var matchingUser = users.FirstOrDefault();
+        //            result.UserName = matchingUser?.UserName!;
+        //            return result;
+        //        }).ToList();
+
                 
 
-                return Results.Ok(new {users = userList, messages = mergedList});
-            }
-           catch (ArgumentNullException ex)
-           {
-               return Results.Problem("Argument Null Exception!", ex.Message);
+        //        return Results.Ok(new {users = userList, messages = mergedList});
+        //    }
+        //   catch (ArgumentNullException ex)
+        //   {
+        //       return Results.Problem("Argument Null Exception!", ex.Message);
 
-           }
-           catch (Exception ex)
-           {
-               return Results.Problem(ex.Message);
-           }
-        }
+        //   }
+        //   catch (Exception ex)
+        //   {
+        //       return Results.Problem(ex.Message);
+        //   }
+        //}
 
         public async Task<IResult> GetMessage(string chatId, string messageId)
         {

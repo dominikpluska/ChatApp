@@ -28,12 +28,11 @@ import { UserLight } from '../models/userlight.model';
 export class ChatPageComponent implements OnInit {
   chatId = input.required<string>();
   chatterName = input<string>('TestAccount');
-  private chatParticipants!: UserLight[];
+
   private userSettings = inject(UserSettings);
   private chatService = inject(ChatService);
   private destroyRef = inject(DestroyRef);
   private toastr = inject(ToastrService);
-  private messages!: MessageReceived[];
 
   textMessageForm = new FormGroup<MessagePosted>({
     ChatId: new FormControl<string>('', [
@@ -49,38 +48,18 @@ export class ChatPageComponent implements OnInit {
   ngOnInit(): void {
     if (this.chatId === null) {
       this.toastr.error('Chat Id is not provided!');
+    } else {
+      this.textMessageForm.get('ChatId')?.setValue(this.chatId());
+      this.chatService.getChatMessages(this.chatId());
     }
-    const subscription = this.chatService
-      .getChatMessages(this.chatId()!)
-      .subscribe({
-        next: (response) => {
-          this.textMessageForm.get('ChatId')?.setValue(this.chatId());
-          this.chatParticipants = response.users;
-          this.messages = response.messages;
-        },
-        error: (error) => {
-          this.toastr.error(error.toString());
-        },
-      });
-    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
-  postMessage() {
-    const subscription = this.chatService
-      .postNewMessage(this.textMessageForm)
-      .subscribe({
-        next: (response) => {
-          console.log(response);
-        },
-        error: (error) => {
-          this.toastr.error(error.toString());
-        },
-      });
-    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  async postMessage() {
+    await this.chatService.postNewMessage(this.chatId(), this.textMessageForm);
   }
 
   get getMessages() {
-    return this.messages;
+    return this.chatService.getMessages;
   }
 
   get getCurrentUserId() {
@@ -88,6 +67,6 @@ export class ChatPageComponent implements OnInit {
   }
 
   get getChatParticipants() {
-    return this.chatParticipants;
+    return this.chatService.getChatParticipants;
   }
 }
