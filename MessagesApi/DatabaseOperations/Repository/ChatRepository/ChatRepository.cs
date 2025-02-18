@@ -54,21 +54,58 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
             }
         }
 
-        public async Task<IEnumerable<ChatParticipant>> GetChatParticipants(ObjectId chatId)
+        public async Task<string> FindChat(string userId, string chatterId)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(userId, chatterId);
+
+                var filter = Builders<Chat>.Filter.All(x => x.ChatParticipants, new[] {userId, chatterId});
+                var projection = Builders<Chat>.Projection
+                    .Exclude(x => x.ChatParticipants)
+                    .Exclude(x => x.Messages);
+
+                var document = await _mongoDBService.ChatCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
+
+                if(document == null)
+                {
+                    return null!;
+                }
+
+                var selectedId = document.GetValue("_id");
+                var deserializedResult = BsonSerializer.Deserialize<ObjectId>(selectedId.ToJson());
+
+                return deserializedResult.ToString();
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new ArgumentException("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<IEnumerable<string>> GetChatParticipants(ObjectId chatId)
         {
             try
             {
                 var filter = Builders<Chat>.Filter.Eq(x => x.ChatId, chatId);
                 var projection = Builders<Chat>.Projection
-                    .Include(x => x.ChatParticipants)
-                    .Include(x => x.Messages)
+                    .Exclude(x => x.Messages)
                     .Exclude(x => x.ChatId);
 
 
                 var results = await _mongoDBService.ChatCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
-                var chatParticipantsBson = results.GetValue("ChatParticipants").AsBsonArray;
 
-                var deserializedResults = chatParticipantsBson.Select(x => BsonSerializer.Deserialize<ChatParticipant>(x.AsBsonDocument)).ToList(); 
+                var chatParticipantsBson = results.GetValue("ChatParticipants");
+                var deserializedResults = BsonSerializer.Deserialize<IEnumerable<string>>(chatParticipantsBson.ToJson());
+
                 return deserializedResults;
             }
             catch(ArgumentNullException ex)
@@ -92,7 +129,6 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
             {
                 new BsonDocument("$match", new BsonDocument("_id", chatId)),
                 new BsonDocument("$unwind", "$Messages"),
-                new BsonDocument("$sort", new BsonDocument("Messages.PostedDate", -1)),
                 new BsonDocument("$limit", 10),
                 new BsonDocument("$project", new BsonDocument
                 {

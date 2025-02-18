@@ -1,0 +1,9 @@
+.current-user {
+  background-color: #7886c7;
+  @apply max-w-[600px] px-2 py-2 rounded-md mt-2 ml-auto mr-4;
+}
+
+.chatter-user {
+  background-color: #d5d8e6;
+  @apply max-w-[600px] px-2 py-2 rounded-md mt-2 ml-4 mr-auto text-black;
+}

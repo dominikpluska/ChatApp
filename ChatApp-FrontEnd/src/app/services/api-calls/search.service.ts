@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { authApi } from '../apipath';
 import { catchError, throwError } from 'rxjs';
 import { SearchUser } from '../../models/searchuser.model';
+import { error } from 'console';
 
 @Injectable({ providedIn: 'root' })
 export class SearchService {
@@ -17,7 +18,7 @@ export class SearchService {
       )
       .pipe(
         catchError((error) => {
-          const errorMessage = error.status;
+          const errorMessage = error.error.detail;
           return throwError(() => new Error(errorMessage));
         })
       );
@@ -28,7 +29,7 @@ export class SearchService {
       .get<SearchUser[]>(`${authApi}Search/${userName.toLowerCase()}`)
       .pipe(
         catchError((error) => {
-          const errorMessage = error.status;
+          const errorMessage = error.error.detail;
           return throwError(() => new Error(errorMessage));
         })
       );

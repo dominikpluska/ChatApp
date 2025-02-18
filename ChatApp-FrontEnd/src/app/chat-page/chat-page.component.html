@@ -1,2 +1,15 @@
-<app-chat-box-component />
-<app-message-box-component />
+<div class="pt-20 ml-10 flex text-xl">
+  <p class="pr-2">Chat with:</p>
+  @for (item of getChatParticipants; track $index) { @if(item.userAccountId !==
+  getCurrentUserId){
+  <p class="pr-2">{{ item.userName }}</p>
+  } }
+</div>
+<app-chat-box-component
+  [messages]="getMessages"
+  [currentUserId]="getCurrentUserId"
+/>
+<app-message-box-component
+  [form]="textMessageForm"
+  (onButtonPress)="postMessage()"
+/>

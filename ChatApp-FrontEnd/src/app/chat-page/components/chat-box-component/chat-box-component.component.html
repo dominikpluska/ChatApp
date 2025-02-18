@@ -1,0 +1,12 @@
+<div>
+  @for (item of messages(); track item.messageId) {
+  <app-message-component
+    [currentuserId]="currentUserId()"
+    [userName]="item.userName"
+    [userId]="item.userId"
+    [postedDate]="item.postedDate"
+    [messageId]="item.messageId"
+    [textMessage]="item.textMessage"
+  />
+  }
+</div>

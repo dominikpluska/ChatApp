@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, NgZone, OnInit } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -22,17 +22,20 @@ export class LoginFormComponent implements OnInit {
   private authenticationService = inject(AuthenticationService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
+  private zone = inject(NgZone);
 
   ngOnInit(): void {
-    const subscription = this.authenticationService.checkAuth().subscribe({
-      next: (response) => {
-        this.router.navigate(['/', 'main']);
-      },
-      error: (error) => {
-        console.log(error);
-      },
+    this.zone.runOutsideAngular(() => {
+      const subscription = this.authenticationService.checkAuth().subscribe({
+        next: (response) => {
+          this.router.navigate(['/', 'main']);
+        },
+        error: (error) => {
+          console.log(error);
+        },
+      });
+      this.destroyRef.onDestroy(() => subscription.unsubscribe());
     });
-    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
   loginForm = new FormGroup<UserLogin>({

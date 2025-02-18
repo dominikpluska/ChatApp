@@ -12,6 +12,8 @@ namespace MessagesApi
         public static WebApplicationBuilder AddServices(this WebApplicationBuilder builder)
         {
             builder.Services.AddHttpClient();
+            builder.Services.AddAuthorization();
+
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             builder.Services.AddScoped<IChatCommands, ChatCommands>();
             builder.Services.AddScoped<IChatRepository, ChatRepository>();

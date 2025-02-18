@@ -1,0 +1,14 @@
+<div class="w-full">
+  <div
+    id="{{ messageId() }}"
+    [ngClass]="{
+      'current-user': currentuserId() === userId(),
+      'chatter-user': currentuserId() !== userId()
+    }"
+  >
+    <p>{{ userName() }} : {{ postedDate() | date : "medium" }}</p>
+    <span>
+      {{ textMessage() }}
+    </span>
+  </div>
+</div>

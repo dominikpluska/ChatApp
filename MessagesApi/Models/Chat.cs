@@ -10,7 +10,7 @@ namespace MessagesApi.Models
     {
         [BsonId]
         public ObjectId ChatId { get; set; } = ObjectId.GenerateNewId();
-        public required List<ChatParticipant> ChatParticipants { get; set; }
+        public required List<string> ChatParticipants { get; set; }
         public List<Message> Messages { get; set; } = new List<Message>();
 
     }

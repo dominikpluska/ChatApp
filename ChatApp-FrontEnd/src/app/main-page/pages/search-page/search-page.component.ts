@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, NgZone, OnInit } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -12,6 +12,7 @@ import { FriendsListService } from '../../../services/api-calls/friendslists.ser
 import { BlackListService } from '../../../services/api-calls/blacklist.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { ChatService } from '../../../services/api-calls/chat.service';
 
 @Component({
   selector: 'app-search-page',
@@ -30,10 +31,12 @@ export class SearchPageComponent implements OnInit {
   private searchService = inject(SearchService);
   private friendsListService = inject(FriendsListService);
   private blackListService = inject(BlackListService);
+  private chatService = inject(ChatService);
   private destroyRef = inject(DestroyRef);
   private currentPaginationSelection = 1;
   private router = inject(Router);
   private tastr = inject(ToastrService);
+  private zone = inject(NgZone);
 
   //implement adding and blocking users from this view
   //implement chat route
@@ -178,10 +181,15 @@ export class SearchPageComponent implements OnInit {
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
-  //modify this method!
-  //this method must reach out to the chats database to search for the chat id and then route it to the correct path
-  //if chat does not exist, the backend should create one and return its id
   onChatRoute(userId: string) {
-    this.router.navigate(['main/chat', { chatId: userId }]);
+    const subscription = this.chatService.getChat(userId).subscribe({
+      next: (response) => {
+        this.router.navigate(['main/chat', { chatId: response.toString() }]);
+      },
+      error: (error) => {
+        this.tastr.error(error.toString());
+      },
+    });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 }

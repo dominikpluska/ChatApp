@@ -79,6 +79,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.AddServices();
 var app = builder.Build();
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {

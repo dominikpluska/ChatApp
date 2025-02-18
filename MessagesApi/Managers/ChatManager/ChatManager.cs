@@ -26,6 +26,68 @@ namespace MessagesApi.Managers.ChatManager
             _mapper = mapper;
         }
 
+        //Currently working on
+        //TODO Insert it to the chats list
+        public async Task<IResult> OpenChat(string chatterId)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(chatterId);
+
+                var userId = _userAccessor.UserId;
+                var userProperties = await _authenticationService.GetAccountProperties(userId);
+
+                if (userProperties == null || !userProperties.IsActive)
+                {
+                    return Results.Problem("User does not exist or is inactive!");
+                }
+
+                if(userProperties.UserAccountId == chatterId)
+                {
+                    return Results.Problem("You can't have chat with yourself silly!");
+                }
+
+                var chatterProperties = await _authenticationService.GetAccountProperties(chatterId);
+
+                if (chatterProperties == null || !chatterProperties.IsActive)
+                {
+                    return Results.Problem("User does not exist or is inactive!");
+                }
+
+                var checkIfChatExists = await _chatRepository.FindChat(userProperties.UserAccountId, chatterProperties.UserAccountId);
+
+                if(checkIfChatExists != null)
+                {
+                    return Results.Ok(checkIfChatExists);
+                }
+
+                Chat chat = new()
+                {
+                    ChatParticipants = new List<string>()
+                    {
+                        userProperties.UserAccountId,
+                        chatterProperties.UserAccountId
+                    }
+                };
+
+                var chatId = await _chatCommands.CreateChat(chat);
+
+                //Insert it to the chats list
+
+                return Results.Ok(chatId);
+
+            }
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem("Argument Null Exception!", ex.Message);
+
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        }
+
         //public async Task<IResult> SendChatRequest(ChatRequestDto chatRequestDto)
         //{
         //    try
@@ -157,7 +219,7 @@ namespace MessagesApi.Managers.ChatManager
                 var chatId = ObjectId.Parse(messageDto.ChatId);
                 var chatParticipants = await _chatRepository.GetChatParticipants(chatId);
 
-                var getChatParticipant = chatParticipants.Where(x => x.UserId == userId).FirstOrDefault();
+                var getChatParticipant = chatParticipants.Where(x => x == userId).FirstOrDefault();
                 if (getChatParticipant == null)
                 {
                     return Results.Problem("The user isn't a part of the chat session!");
@@ -200,7 +262,7 @@ namespace MessagesApi.Managers.ChatManager
                 }
 
                 var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
-                var checkUser = participants.Where(x => x.UserId == userId).FirstOrDefault();
+                var checkUser = participants.Where(x => x == userId).FirstOrDefault();
 
                 if (checkUser == null)
                 {
@@ -208,7 +270,29 @@ namespace MessagesApi.Managers.ChatManager
                 }
 
                 var result = await _chatRepository.GetChatMessages(chatIdParsed);
-                return Results.Ok(result);
+
+                List<MessageRetrivedDto> messageRetrivedDtos = new();
+
+                var mappedResults =  _mapper.Map(result, messageRetrivedDtos);
+
+
+                IdRequestsDto idRequestsDtos = new()
+                {
+                    Ids = participants
+                };
+
+                var userList = await _authenticationService.GetUserListByIds(idRequestsDtos);
+
+                var mergedList = mappedResults.GroupJoin(userList, result => result.UserId, user => user.UserAccountId, (result, users) =>
+                {
+                    var matchingUser = users.FirstOrDefault();
+                    result.UserName = matchingUser?.UserName!;
+                    return result;
+                }).ToList();
+
+                
+
+                return Results.Ok(new {users = userList, messages = mergedList});
             }
            catch (ArgumentNullException ex)
            {
@@ -240,7 +324,7 @@ namespace MessagesApi.Managers.ChatManager
                 }
 
                 var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
-                var checkUser = participants.Where(x => x.UserId == userId).FirstOrDefault();
+                var checkUser = participants.Where(x => x == userId).FirstOrDefault();
 
                 if (checkUser == null)
                 {
@@ -275,7 +359,7 @@ namespace MessagesApi.Managers.ChatManager
                 }
 
                 var participants = await _chatRepository.GetChatParticipants(ObjectId.Parse(messageUpdateDto.ChatId));
-                var checkUser = participants.Where(x => x.UserId == userId).FirstOrDefault();
+                var checkUser = participants.Where(x => x == userId).FirstOrDefault();
 
                 if (checkUser == null)
                 {
@@ -318,7 +402,7 @@ namespace MessagesApi.Managers.ChatManager
                 var messageIdParsed = ObjectId.Parse(messageId);
 
                 var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
-                var checkUser = participants.Where(x => x.UserId == userId).FirstOrDefault();
+                var checkUser = participants.Where(x => x == userId).FirstOrDefault();
 
                 if (checkUser == null)
                 {
@@ -365,7 +449,7 @@ namespace MessagesApi.Managers.ChatManager
                 var chatIdParsed = ObjectId.Parse(chatId);
 
                 var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
-                var checkUser = participants.Where(x => x.UserId == userId).FirstOrDefault();
+                var checkUser = participants.Where(x => x == userId).FirstOrDefault();
 
                 if (checkUser == null)
                 {
@@ -399,6 +483,7 @@ namespace MessagesApi.Managers.ChatManager
 
 
         //Add functionality to add new users to already existing chats
+        
 
     }
 }

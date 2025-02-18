@@ -18,13 +18,13 @@ namespace MessagesApi.DatabaseOperations.Commands.ChatCommands
             _mongoDBService = mongoDBService;
         }
 
-        public async Task<IResult> CreateChat(Chat chat)
+        public async Task<string> CreateChat(Chat chat)
         {
             try
             {
                 ArgumentNullException.ThrowIfNull(chat);
                 await _mongoDBService.ChatCollection.InsertOneAsync(chat);
-                return Results.Ok("Chat has been created");
+                return chat.ChatId.ToString();
             }
             catch(ArgumentNullException ex)
             {
