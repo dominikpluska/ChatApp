@@ -13,8 +13,7 @@ export class RequestsService {
       .get<AppRequest[]>(`${userSettingsApi}GetAllRequests`)
       .pipe(
         catchError((error) => {
-          //console.log(error.status);
-          const errorMessage = error.status;
+          const errorMessage = error.error.detail;
           return throwError(() => new Error(errorMessage));
         })
       );

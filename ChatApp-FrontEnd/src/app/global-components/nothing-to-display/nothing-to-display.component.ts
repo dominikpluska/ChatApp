@@ -5,8 +5,6 @@ import { Component } from '@angular/core';
   standalone: true,
   imports: [],
   templateUrl: './nothing-to-display.component.html',
-  styleUrl: './nothing-to-display.component.css'
+  styleUrl: './nothing-to-display.component.css',
 })
-export class NothingToDisplayComponent {
-
-}
+export class NothingToDisplayComponent {}

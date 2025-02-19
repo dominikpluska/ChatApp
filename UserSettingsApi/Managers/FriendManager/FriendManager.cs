@@ -1,4 +1,6 @@
-﻿using MongoDB.Bson;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
+using MongoDB.Bson;
 using UserSettingsApi.DatabaseOperations.Commands.FriendRequestCommands;
 using UserSettingsApi.DatabaseOperations.Commands.FriendsLisiCommands;
 using UserSettingsApi.DatabaseOperations.Repository.BlackListRepository;
@@ -8,6 +10,7 @@ using UserSettingsApi.Dto;
 using UserSettingsApi.Models;
 using UserSettingsApi.Services;
 using UserSettingsApi.UserAccessor;
+using UserSettingsApi.UserSettingsHub;
 
 namespace UserSettingsApi.Managers.FriendsListsManager
 {
@@ -20,9 +23,12 @@ namespace UserSettingsApi.Managers.FriendsListsManager
         private readonly IRequestCommands _friendRequestCommands;
         private readonly IRequestsRepository _requestsRepository;
         private readonly IBlackListRepository _blackListRepository;
+        private readonly IHubContext<UserSettingsHub.UserSettingsHub> _hubContext;
+        private readonly IMapper _mapper;
         public FriendManager(IUserAccessor userAccessor, IFriendListCommands friendListCommands, 
             IFriendsListRepository friendsListRepository, IAuthenticationService authenticationService,
-            IRequestCommands friendRequestCommands, IRequestsRepository requestsRepository, IBlackListRepository blackListRepository)
+            IRequestCommands friendRequestCommands, IRequestsRepository requestsRepository, IBlackListRepository blackListRepository,
+            IHubContext<UserSettingsHub.UserSettingsHub> hubContext, IMapper mapper)
         {
             _userAccessor = userAccessor;
             _friendListCommands = friendListCommands;
@@ -31,6 +37,8 @@ namespace UserSettingsApi.Managers.FriendsListsManager
             _friendRequestCommands = friendRequestCommands;
             _requestsRepository = requestsRepository;
             _blackListRepository = blackListRepository;
+            _hubContext = hubContext;
+            _mapper = mapper;
         }
         public async Task<IResult> GetFriendsList()
         {
@@ -143,7 +151,20 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 await _friendRequestCommands.InsertRequests(friendRequest);
 
-                return Results.Ok("Friend request has been sent!");
+
+                var connectionId = UserSettingsHub.UserSettingsHub.IsConnected(newFriendProperties.UserAccountId);
+                if (connectionId != null)
+                {
+                    RequestDto requestDto = new();
+                    requestDto = _mapper.Map(friendRequest, requestDto);
+                    requestDto.UserName = userProperties.UserName;
+
+                    //Request is of the wrong type! That why it is not assigned to the array!
+                    await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveNotification", $"Friend request has been sent by {userProperties.UserName}");
+                    await _hubContext.Clients.Client(connectionId).SendAsync("OnRequestReceived", requestDto);
+                }
+
+                return Results.Ok($"Friend request has been sent to {newFriendProperties.UserName}");
             }
             catch(Exception ex)
             {
@@ -190,7 +211,17 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 await _friendRequestCommands.DeleteRequest(requestIdParsed);
 
-                return Results.Ok("Friend Request has been accepted!");
+                var connectionId = UserSettingsHub.UserSettingsHub.IsConnected(friendRequest.RequestorId);
+                if (connectionId != null)
+                {
+                    await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveNotification", $"Friend request has been accepted by : {userProperties.UserName}");
+                    await _hubContext.Clients.Client(connectionId).SendAsync("OnRequestRemoved", friendRequest);
+                }
+
+                var userConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(userProperties.UserAccountId);
+                await _hubContext.Clients.Client(userConnectionId!).SendAsync("OnRequestRemoved", requestId);
+
+                return Results.Ok("Friend Request has been accepted");
             }
             catch(ArgumentNullException ex)
             {
@@ -225,7 +256,22 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 var friendRequest = await _requestsRepository.GetRequest(requestIdParsed);
 
+                if(friendRequest == null)
+                {
+                    return Results.Problem("The request is null!");
+                }
+
                 await _friendRequestCommands.DeleteRequest(friendRequest.RequestId);
+
+                var requestorConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(friendRequest.RequestorId);
+
+                if(requestorConnectionId != null)
+                {
+                    await _hubContext.Clients.Client(requestorConnectionId).SendAsync("ReceiveNotification", $"{userProperties.UserName} has rejected your friend request!");
+                }
+
+                var userConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(userProperties.UserAccountId);
+                await _hubContext.Clients.Client(userConnectionId!).SendAsync("OnRequestRemoved", requestId);
 
                 return Results.Ok("Friend request has been rejected!");
             }

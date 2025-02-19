@@ -1,9 +1,10 @@
 <div class="container">
   <p>Requests List</p>
-  @if(!getUserSettings.getRequestsList || getUserSettings.getRequestsList.length
-  === 0){
+  @if(getUserSettings.getRequestsList === undefined ||
+  getUserSettings.getRequestsList === null ||
+  getUserSettings.getRequestsList!.length === 0){
   <app-nothing-to-display />
-  } @else{
+  } @else if(getUserSettings.getRequestsList!.length > 0){
   <div class="sub-container">
     @for(item of getUserSettings.getRequestsList; track item){
     <app-tiny-item-component

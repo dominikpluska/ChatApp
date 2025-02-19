@@ -43,6 +43,11 @@ namespace UserSettingsApi.Managers.RequestsManager
 
                 var results = await _requestsRepository.GetAllRequests(userProperties.UserAccountId);
 
+                if (results.Count() <= 0)
+                {
+                    return Results.Ok(null);
+                }
+
                 IdRequestsDto idRequestsDtos = new()
                 {
                     Ids = results.Select(x => x.RequestorId)

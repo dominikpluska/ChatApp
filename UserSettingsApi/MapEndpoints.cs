@@ -3,6 +3,7 @@ using UserSettingsApi.Managers.BlackListsManager;
 using UserSettingsApi.Managers.ChatsManager;
 using UserSettingsApi.Managers.FriendsListsManager;
 using UserSettingsApi.Managers.RequestsManager;
+using UserSettingsApi.UserSettingsHub;
 
 namespace UserSettingsApi
 {
@@ -39,6 +40,12 @@ namespace UserSettingsApi
         public static WebApplication MapRequestsManagerEndpoints(this WebApplication app, IRequestManager requestManager)
         {
             app.MapGet("/GetAllRequests", async () => await requestManager.GetAllRequests());
+            return app;
+        }
+
+        public static WebApplication MapHubs(this WebApplication app)
+        {
+            app.MapHub<UserSettingsHub.UserSettingsHub>("/UserSettings");
             return app;
         }
     }

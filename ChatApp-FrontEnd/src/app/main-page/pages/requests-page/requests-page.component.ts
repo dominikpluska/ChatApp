@@ -1,4 +1,10 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { NothingToDisplayComponent } from '../../../global-components/nothing-to-display/nothing-to-display.component';
 import { TinyItemComponentComponent } from '../../../global-components/tiny-item-component/tiny-item-component.component';
 import { TinyButtonComponentComponent } from '../../../global-components/tiny-button-component/tiny-button-component.component';
@@ -23,20 +29,20 @@ export class RequestsPageComponent implements OnInit {
   private friendsListService = inject(FriendsListService);
   private destroyRef = inject(DestroyRef);
   private userSettings = inject(UserSettings);
-  private tastr = inject(ToastrService);
+  private toastr = inject(ToastrService);
 
   ngOnInit(): void {
-    if (this.userSettings.getRequestsList == undefined) {
-      const subscription = this.requestsService.getRequests().subscribe({
-        next: (response) => {
-          this.userSettings.setRequestsList = response;
-        },
-        error: (error) => {
-          console.log(error);
-        },
-      });
-      this.destroyRef.onDestroy(() => subscription.unsubscribe());
-    }
+    const subscription = this.requestsService.getRequests().subscribe({
+      next: (response) => {
+        this.userSettings.setRequestsList = response;
+        this.userSettings.onRequestReceived();
+        this.userSettings.onRequestRemoved();
+      },
+      error: (error) => {
+        console.log(error);
+      },
+    });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
   approveRequest(requestId: string) {
@@ -44,10 +50,10 @@ export class RequestsPageComponent implements OnInit {
       .approveFriendRequest(requestId)
       .subscribe({
         next: (response) => {
-          this.tastr.success(response.toString());
+          this.toastr.success(response.toString());
         },
         error: (error) => {
-          this.tastr.error(error.toString());
+          this.toastr.error(error.toString());
         },
       });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
@@ -58,10 +64,10 @@ export class RequestsPageComponent implements OnInit {
       .rejectFriendRequest(requestId)
       .subscribe({
         next: (response) => {
-          this.tastr.success(response.toString());
+          this.toastr.success(response.toString());
         },
         error: (error) => {
-          this.tastr.error(error.toString());
+          this.toastr.error(error.toString());
         },
       });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());

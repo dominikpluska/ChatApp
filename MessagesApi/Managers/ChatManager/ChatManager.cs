@@ -2,6 +2,7 @@
 using MessagesApi.DatabaseOperations.Commands.ChatCommands;
 using MessagesApi.DatabaseOperations.Repository.ChatRepository;
 using MessagesApi.Dto;
+using MessagesApi.MessagesHub;
 using MessagesApi.Models;
 using MessagesApi.Services;
 using MessagesApi.UserAccessor;
@@ -11,26 +12,24 @@ using System.Reflection;
 
 namespace MessagesApi.Managers.ChatManager
 {
-    public class ChatManager : Hub, IChatManager
+    public class ChatManager : IChatManager
     {
         private readonly IChatCommands _chatCommands;
         private readonly IChatRepository _chatRepository;
         private readonly IUserAccessor _userAccessor;
         private readonly IMapper _mapper;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IHubContext<MessagesHub.MessagesHub> _hubContext;
 
-        public ChatManager(IChatCommands chatCommands, IChatRepository chatRepository, IUserAccessor userAccessor, IMapper mapper, IAuthenticationService authenticationService)
+        public ChatManager(IChatCommands chatCommands, IChatRepository chatRepository, IUserAccessor userAccessor,
+            IMapper mapper, IAuthenticationService authenticationService, IHubContext<MessagesHub.MessagesHub> hubContext)
         {
             _authenticationService = authenticationService;
             _chatCommands = chatCommands;
             _chatRepository = chatRepository;
             _userAccessor = userAccessor;
+            _hubContext = hubContext;
             _mapper = mapper;
-        }
-
-        public override async Task OnConnectedAsync()
-        {
-            await Clients.Caller.SendAsync("Connected to the chat session!");
         }
 
         //Currently working on
@@ -210,7 +209,7 @@ namespace MessagesApi.Managers.ChatManager
 
         //}
 
-        public async Task PostMessage(MessageDto messageDto)
+        public async Task<IResult> PostMessage(MessageDto messageDto)
         {
             try
             {
@@ -221,7 +220,7 @@ namespace MessagesApi.Managers.ChatManager
 
                 if (userProperties == null || !userProperties.IsActive)
                 {
-                    await Clients.Caller.SendAsync(nameof(PostMessage), "User is disabled or incative!");
+                    return Results.Problem("User is disabled or incative!");
                 }
                 var chatId = ObjectId.Parse(messageDto.ChatId);
                 var chatParticipants = await _chatRepository.GetChatParticipants(chatId);
@@ -229,7 +228,7 @@ namespace MessagesApi.Managers.ChatManager
                 var getChatParticipant = chatParticipants.Where(x => x == userId).FirstOrDefault();
                 if (getChatParticipant == null)
                 {
-                    await Clients.Caller.SendAsync(nameof(PostMessage), "The user isn't a part of the chat session!");
+                    return Results.Problem("The user isn't a part of the chat session!");
                 }
 
                 Message message = new()
@@ -246,22 +245,22 @@ namespace MessagesApi.Managers.ChatManager
 
                 mappedMessage.UserName = userProperties!.UserName;
 
-                await Groups.AddToGroupAsync(_userAccessor.UserId, chatId.ToString());
+                await _hubContext.Clients.Group(messageDto.ChatId).SendAsync("ReceiveMessage", mappedMessage);
 
-                await Clients.Group(chatId.ToString()).SendAsync(nameof(PostMessage), mappedMessage);
+                return Results.Ok(mappedMessage);
             }
             catch (ArgumentNullException ex)
             {
-                await Clients.Caller.SendAsync(nameof(PostMessage), "Argument Null Exception!", ex.Message);
+                return Results.Problem("Argument Null Exception!", ex.Message);
 
             }
             catch (Exception ex)
             {
-                await Clients.Caller.SendAsync(nameof(PostMessage), ex.Message);
+                return Results.Problem(ex.Message);
             }
         }
 
-        public async Task GetMessages(string chatId)
+        public async Task<IResult> GetMessages(string chatId)
         {
             try
             {
@@ -273,7 +272,8 @@ namespace MessagesApi.Managers.ChatManager
 
                 if (userProperties == null || !userProperties.IsActive)
                 {
-                    await Clients.Caller.SendAsync(nameof(GetMessages), "User is disabled or incative!");
+                    return Results.Problem("User is disabled or incative!");
+                    //await Clients.Caller.SendAsync(nameof(GetMessages), "User is disabled or incative!");
                 }
 
                 var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
@@ -281,15 +281,13 @@ namespace MessagesApi.Managers.ChatManager
 
                 if (checkUser == null)
                 {
-                    //return Results.Problem("User is not a chat participant!");
-                    await Clients.Caller.SendAsync(nameof(GetMessages), "User is not a chat participant!");
+                    return Results.Problem("User is not a chat participant!");
+                    //await Clients.Caller.SendAsync(nameof(GetMessages), "User is not a chat participant!");
                 }
 
                 var result = await _chatRepository.GetChatMessages(chatIdParsed);
 
-                await Groups.AddToGroupAsync(_userAccessor.UserId, chatId);
-
-                await Clients.Caller.SendAsync(nameof(GetMessages), result);
+                //await Clients.Caller.SendAsync(nameof(GetMessages), result);
 
                 List<MessageRetrivedDto> messageRetrivedDtos = new();
 
@@ -310,17 +308,19 @@ namespace MessagesApi.Managers.ChatManager
                     return result;
                 }).ToList();
 
-
-                await Clients.Caller.SendAsync(nameof(GetMessages), new { users = userList, messages = mergedList });
+                return Results.Ok(new { users = userList, messages = mergedList });
+                //await Clients.Caller.SendAsync(nameof(GetMessages), new { users = userList, messages = mergedList });
             }
             catch (ArgumentNullException ex)
             {
-                await Clients.Caller.SendAsync(nameof(GetMessages), "Argument Null Exception!", ex.Message);
+                return Results.Problem("Argument Null Exception!", ex.Message);
+                //await Clients.Caller.SendAsync(nameof(GetMessages), "Argument Null Exception!", ex.Message);
 
             }
             catch (Exception ex)
             {
-                await Clients.Caller.SendAsync(nameof(GetMessages), ex.Message);
+                return Results.Problem(ex.Message);
+                //await Clients.Caller.SendAsync(nameof(GetMessages), ex.Message);
             }
         }
 

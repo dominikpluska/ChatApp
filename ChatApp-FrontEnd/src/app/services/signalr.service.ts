@@ -7,12 +7,6 @@ export class SignalrRService {
   private hubConnection!: HubConnection;
   private toastr = inject(ToastrService);
 
-  //   constructor() {
-  //     this.hubConnection = new HubConnectionBuilder()
-  //       .withUrl('https://localhost:7501')
-  //       .build();
-  //   }
-
   get getHubConnection() {
     return this.hubConnection;
   }
@@ -21,7 +15,8 @@ export class SignalrRService {
     try {
       this.hubConnection = new HubConnectionBuilder().withUrl(url).build();
       await this.hubConnection.start();
-    } catch (error) {
+    } catch (error: any) {
+      this.toastr.error(error.toString());
       console.log(error);
     }
   }

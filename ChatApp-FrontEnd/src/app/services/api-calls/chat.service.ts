@@ -7,6 +7,7 @@ import { FormGroup } from '@angular/forms';
 import { MessagePosted } from '../../models/messageposted.model';
 import { SignalrRService } from '../signalr.service';
 import { UserLight } from '../../models/userlight.model';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
@@ -14,6 +15,19 @@ export class ChatService {
   private signalRSevice = inject(SignalrRService);
   private messages!: MessageReceived[];
   private chatParticipants!: UserLight[];
+  private toastr = inject(ToastrService);
+
+  startSignalRConnection(chatId: string) {
+    this.signalRSevice
+      .connect(`${messageApi}Chat`)
+      .then(() =>
+        this.signalRSevice.getHubConnection.invoke('JoinChat', chatId)
+      );
+  }
+
+  terminateSignalRConnection(chatId: string) {
+    this.signalRSevice.getHubConnection.invoke('LeaveChat', chatId);
+  }
 
   getChat(chatterId: string) {
     return this.htppClient
@@ -26,36 +40,35 @@ export class ChatService {
       );
   }
 
-  async getChatMessages(chatId: string) {
-    this.signalRSevice.connect(`${messageApi}Chat/${chatId}`).then(() => {
-      this.signalRSevice.getHubConnection.invoke('GetMessages', chatId);
-    });
-
-    this.signalRSevice.getHubConnection.on('GetMessages', (response: any) => {
-      this.chatParticipants = response.users;
-      this.messages = response.messages;
-    });
+  postNewMessage(messsagePosted: FormGroup<MessagePosted>) {
+    return this.htppClient
+      .post<MessageReceived[]>(`${messageApi}PostMessage`, messsagePosted.value)
+      .pipe(
+        catchError((error) => {
+          const errorMessage = error.error.detail;
+          return throwError(() => new Error(errorMessage));
+        })
+      );
   }
 
-  async postNewMessage(
-    chatId: string,
-    messsagePosted: FormGroup<MessagePosted>
-  ) {
-    this.signalRSevice.connect(`${messageApi}Chat/${chatId}`).then(() => {
-      this.signalRSevice.getHubConnection.invoke(
-        'PostMessage',
-        messsagePosted.value
-      );
-    });
-
+  onMessageReceived() {
     this.signalRSevice.getHubConnection.on(
-      'PostMessage',
+      'ReceiveMessage',
       (response: MessageReceived) => {
-        console.log(response);
         this.messages.push(response);
-        messsagePosted.get('TextMessage')?.setValue('');
       }
     );
+  }
+
+  getChatMessages(chatId: string) {
+    return this.htppClient
+      .get<any>(`${messageApi}GetChatMessages/${chatId}`)
+      .pipe(
+        catchError((error) => {
+          const errorMessage = error.error.detail;
+          return throwError(() => new Error(errorMessage));
+        })
+      );
   }
 
   get getChatParticipants() {
@@ -64,5 +77,13 @@ export class ChatService {
 
   get getMessages() {
     return this.messages;
+  }
+
+  set setMessages(messages: MessageReceived[]) {
+    this.messages = messages;
+  }
+
+  set setChatParticipants(chatParticipants: UserLight[]) {
+    this.chatParticipants = chatParticipants;
   }
 }

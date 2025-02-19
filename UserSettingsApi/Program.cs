@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
-        builder.WithOrigins("http://localhost:4200", "https://localhost:7500")
+        builder.WithOrigins("http://localhost:4200", "https://localhost:7500", "http://192.168.0.228:4200")
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials();
@@ -99,7 +99,8 @@ var requestsManager = scope.ServiceProvider.GetRequiredService<IRequestManager>(
 app.MapChatsEndpoints(chatsManager)
     .MapBlackListsEndpoints(blackListsManager)
     .MapFriendsManagerEndpoints(friendsListsManager)
-    .MapRequestsManagerEndpoints(requestsManager);
+    .MapRequestsManagerEndpoints(requestsManager)
+    .MapHubs();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -109,7 +110,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-DataBaseGenerator.Generate(app);
+app.Generate();
 app.Run();
 
 
