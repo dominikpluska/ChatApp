@@ -159,7 +159,6 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                     requestDto = _mapper.Map(friendRequest, requestDto);
                     requestDto.UserName = userProperties.UserName;
 
-                    //Request is of the wrong type! That why it is not assigned to the array!
                     await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveNotification", $"Friend request has been sent by {userProperties.UserName}");
                     await _hubContext.Clients.Client(connectionId).SendAsync("OnRequestReceived", requestDto);
                 }
@@ -183,6 +182,8 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                 var userId = _userAccessor.UserId;
                 var userProperties = await _authenticationService.GetAccountProperties(userId);
 
+                
+
                 if (userProperties == null)
                 {
                     return Results.Problem("User does not exist!");
@@ -195,7 +196,9 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 var friendRequest = await _requestsRepository.GetRequest(requestIdParsed);
 
-                if(friendRequest.RequesteeId != userId)
+                var friendProperties = await _authenticationService.GetAccountProperties(friendRequest.RequestorId);
+
+                if (friendRequest.RequesteeId != userId)
                 {
                     return Results.Problem("User Id does not match the one saved in the database!");
                 }
@@ -214,12 +217,28 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                 var connectionId = UserSettingsHub.UserSettingsHub.IsConnected(friendRequest.RequestorId);
                 if (connectionId != null)
                 {
+
+                    UserAccountLightDto newFriendLightDto = new()
+                    {
+                        UserAccountId = userProperties.UserAccountId,
+                        UserName = userProperties.UserName
+                    };
+
+
                     await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveNotification", $"Friend request has been accepted by : {userProperties.UserName}");
                     await _hubContext.Clients.Client(connectionId).SendAsync("OnRequestRemoved", friendRequest);
+                    await _hubContext.Clients.Client(connectionId).SendAsync("OnAddFriend", newFriendLightDto);
                 }
+
+                UserAccountLightDto userAccountLightDto = new()
+                {
+                    UserAccountId = friendRequest.RequestorId,
+                    UserName = friendProperties.UserName
+                };
 
                 var userConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(userProperties.UserAccountId);
                 await _hubContext.Clients.Client(userConnectionId!).SendAsync("OnRequestRemoved", requestId);
+                await _hubContext.Clients.Client(userConnectionId!).SendAsync("OnAddFriend", userAccountLightDto);
 
                 return Results.Ok("Friend Request has been accepted");
             }
@@ -317,6 +336,20 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
 
                 await _friendListCommands.RemoveFriend(friendsListIdFriend, userProperties.UserAccountId);
+
+                var userConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(userProperties.UserAccountId);
+
+                if(userConnectionId != null)
+                {
+                    await _hubContext.Clients.Client(userConnectionId).SendAsync("OnRemoveFriend", friendId);
+                }
+
+                var friendConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(friendProperties.UserAccountId);
+
+                if(friendConnectionId != null)
+                {
+                    await _hubContext.Clients.Client(friendConnectionId).SendAsync("OnRemoveFriend", friendId);
+                }
 
                 return Results.Ok("Friend has been removed!");
 

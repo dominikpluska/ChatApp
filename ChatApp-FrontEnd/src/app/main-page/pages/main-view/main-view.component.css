@@ -1,0 +1,12 @@
+.container {
+  @apply mt-24 ml-10 h-5/6 w-11/12;
+}
+
+.sub-container {
+  @apply lg:h-3/4 2xl:h-5/6 overflow-y-auto;
+}
+
+p {
+  color: #7886c7;
+  @apply ml-10 text-2xl font-bold pb-4;
+}

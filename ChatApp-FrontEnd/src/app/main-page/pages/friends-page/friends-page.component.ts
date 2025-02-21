@@ -6,6 +6,7 @@ import { UserSettings } from '../../../services/usersettings.service';
 import { NothingToDisplayComponent } from '../../../global-components/nothing-to-display/nothing-to-display.component';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { ChatService } from '../../../services/api-calls/chat.service';
 
 @Component({
   selector: 'app-friends-page',
@@ -20,20 +21,22 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class FriendsPageComponent implements OnInit {
   private friendsListService = inject(FriendsListService);
+  private chatService = inject(ChatService);
   private destroyRef = inject(DestroyRef);
   private userSettings = inject(UserSettings);
   private router = inject(Router);
   private toastr = inject(ToastrService);
-
-  //Implement a friends list to the userSettings using friend model
 
   ngOnInit(): void {
     if (this.userSettings.getFriendsList == undefined) {
       const subscription = this.friendsListService.getFriendsList().subscribe({
         next: (response) => {
           this.userSettings.setFriendsList = response;
+          this.userSettings.onRemoveFriend();
+          this.userSettings.onAddFriend();
         },
         error: (error) => {
+          this.toastr.error(error);
           console.log(error);
         },
       });
@@ -46,7 +49,15 @@ export class FriendsPageComponent implements OnInit {
   }
 
   onChatRoute(userId: string) {
-    this.router.navigate(['main/chat', { chatId: userId }]);
+    const subscription = this.chatService.getChat(userId).subscribe({
+      next: (response) => {
+        this.router.navigate(['main/chat', { chatId: response.toString() }]);
+      },
+      error: (error) => {
+        this.toastr.error(error.toString());
+      },
+    });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
   onFriendRemove(friendId: string) {

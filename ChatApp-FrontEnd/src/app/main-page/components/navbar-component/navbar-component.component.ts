@@ -46,4 +46,8 @@ export class NavbarComponentComponent {
     });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
+
+  onRoute(route: string) {
+    this.router.navigate([route]);
+  }
 }

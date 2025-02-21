@@ -28,6 +28,8 @@ export class BlackListPageComponent {
       const subscription = this.blackListService.getBlackList().subscribe({
         next: (response) => {
           this.userSettings.setBlackList = response;
+          this.userSettings.onBlockUser();
+          this.userSettings.onRemoveBlockedUser();
         },
         error: (error) => {
           console.log(error);

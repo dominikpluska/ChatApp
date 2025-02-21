@@ -1,10 +1,13 @@
 import {
   Component,
+  computed,
   DestroyRef,
+  ElementRef,
   inject,
   input,
   OnDestroy,
   OnInit,
+  viewChild,
 } from '@angular/core';
 import { ChatBoxComponentComponent } from './components/chat-box-component/chat-box-component.component';
 import { MessageBoxComponentComponent } from './components/message-box-component/message-box-component.component';

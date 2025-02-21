@@ -38,6 +38,7 @@ namespace AuthApi.DataBaseOperations.Commands.UserAccountsCommands
         {
             using var dbContext = await _context.CreateDbContextAsync();
             await dbContext.UserAccounts.Where(x => x.UserAccountId == userId).ExecuteDeleteAsync();
+            await dbContext.SaveChangesAsync();
             return Results.Ok("User deleted");
         }
 
@@ -50,7 +51,7 @@ namespace AuthApi.DataBaseOperations.Commands.UserAccountsCommands
                 .SetProperty(x => x.Email, x => userAccountDto.Email)
                 .SetProperty(x => x.PicturePath, x => userAccountDto.PicturePath)
                 );
-
+            await dbContext.SaveChangesAsync();
             return Results.Ok("Record Updated");
         }
 
@@ -60,7 +61,7 @@ namespace AuthApi.DataBaseOperations.Commands.UserAccountsCommands
             await dbContext.UserAccounts.Where(x => x.UserAccountId == userPasswordChange.UserAccountId).ExecuteUpdateAsync(
                 x => x.SetProperty(x => x.PasswordHash, x => userPasswordChange.PasswordHash)
                );
-
+            await dbContext.SaveChangesAsync();
             return Results.Ok("Password Updated");
         }
     }

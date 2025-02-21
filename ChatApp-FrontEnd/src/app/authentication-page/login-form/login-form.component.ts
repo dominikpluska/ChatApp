@@ -58,7 +58,6 @@ export class LoginFormComponent implements OnInit {
   }
 
   onSubmit() {
-    this.submitted = true;
     if (
       !this.loginForm.get('Password')?.errors &&
       !this.loginForm.get('UserName')?.errors
@@ -67,10 +66,11 @@ export class LoginFormComponent implements OnInit {
         .login(this.loginForm)
         .subscribe({
           next: (response) => {
+            this.submitted = false;
             this.router.navigate(['/', 'main']);
           },
           error: (error) => {
-            this.errorMessage = error;
+            this.errorMessage = error.ToString();
           },
         });
       this.destroyRef.onDestroy(() => subscription.unsubscribe());

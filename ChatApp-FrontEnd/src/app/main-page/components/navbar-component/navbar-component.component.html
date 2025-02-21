@@ -5,10 +5,10 @@
   </button>
   @if(getIsOptionsButtonActive) {
   <div class="absolute right-0 z-10 mt-10">
-    <button class="button-option">
+    <button class="button-option" (click)="onRoute('change-settings')">
       <i class="bi bi-gear-fill"></i> Change Settings
     </button>
-    <button class="button-option">
+    <button class="button-option" (click)="onRoute('change-password')">
       <i class="bi bi-file-lock2-fill"></i> Change Password
     </button>
     <button class="button-option" (click)="logOut()">

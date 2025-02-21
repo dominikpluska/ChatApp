@@ -1,0 +1,30 @@
+<div>
+  <form class="form-container" [formGroup]="newSettingsForm">
+    <h1>Change your settings</h1>
+    @if(getWasSubmitted && newSettingsForm.get('NewUserName')?.errors ||
+    getWasSubmitted && newSettingsForm.get('NewEmail')?.errors ||
+    getErrorMessage) {
+    <p class="error-text">
+      {{ getErrorMessage ? getErrorMessage : "Please enter a valid password" }}
+    </p>
+    }
+    <label for="login">New UserName</label>
+    <input
+      id="UserName"
+      type="text"
+      placeholder="New UserName..."
+      formControlName="UserName"
+    />
+    <label for="login">New Email</label>
+    <input
+      id="Email"
+      type="text"
+      placeholder="New Email..."
+      formControlName="Email"
+    />
+    <span>
+      <button type="button" (click)="onSubmit()">Change Settings</button>
+      <button type="button" (click)="onRoute()">Back to Main</button>
+    </span>
+  </form>
+</div>

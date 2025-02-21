@@ -7,6 +7,8 @@ import { FormGroup } from '@angular/forms';
 import { Register } from '../../models/register.model';
 import { response } from 'express';
 import { error } from 'console';
+import { NewPassword } from '../../models/newpassword.model';
+import { NewSettings } from '../../models/newsettings.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
@@ -32,6 +34,26 @@ export class AuthenticationService {
 
   register(reigster: FormGroup<Register>) {
     return this.htppClient.post(`${authApi}Register`, reigster.value).pipe(
+      catchError((error) => {
+        const errorMessage = error.error.detail;
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
+
+  changePassword(changePassword: FormGroup<NewPassword>) {
+    return this.htppClient
+      .post(`${authApi}ChangePassword`, changePassword.value)
+      .pipe(
+        catchError((error) => {
+          const errorMessage = error.error.detail;
+          return throwError(() => new Error(errorMessage));
+        })
+      );
+  }
+
+  changeSettings(newsettings: FormGroup<NewSettings>) {
+    return this.htppClient.post(`${authApi}UpdateUser`, newsettings.value).pipe(
       catchError((error) => {
         const errorMessage = error.error.detail;
         return throwError(() => new Error(errorMessage));

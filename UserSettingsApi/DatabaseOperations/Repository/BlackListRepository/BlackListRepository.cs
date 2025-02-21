@@ -64,7 +64,7 @@ namespace UserSettingsApi.DatabaseOperations.Repository.BlackListRepository
             }
         }
 
-        public async Task <string> GetBlockedUser(ObjectId blackListId, string blockedId)
+        public async Task<string> GetBlockedUser(ObjectId blackListId, string blockedId)
         {
             try
             {
@@ -74,7 +74,7 @@ namespace UserSettingsApi.DatabaseOperations.Repository.BlackListRepository
 
                 var result = await matchedItem.FirstOrDefaultAsync();
 
-                return result!;
+                return result;
 
             }
             catch (ArgumentNullException ex)

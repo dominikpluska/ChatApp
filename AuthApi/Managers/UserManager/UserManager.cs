@@ -137,79 +137,51 @@ namespace AuthApi.Managers.UserManager
             }
         }
 
-        public async Task<IResult> UpdatePassword(UserPasswordChangeDto userPasswordChangeDto)
-        {
-            try
-            {
-                var userFromDb = await _userAccountsRepository.GetUser(userPasswordChangeDto.UserAccountId);
-
-                if (userFromDb == null)
-                {
-                    return Results.Problem("UserId doesn't exist!");
-                }
-
-                if (!BCrypt.Net.BCrypt.Verify(userPasswordChangeDto.OldPassword, userFromDb!.PasswordHash))
-                {
-                    return Results.NotFound("The old password was invalid!");
-                }
-
-                if (userPasswordChangeDto.NewPasswordConfirmed.Length < _passwordLength)
-                {
-                    return Results.Problem($"Password must contain minimum of {_passwordLength} characters!");
-                }
-                if (!userPasswordChangeDto.NewPasswordConfirmed.PasswordChecker())
-                {
-                    return Results.Problem($"Password must contain low, upper character as well as a number and a special character such as ! or *");
-                }
-
-                var password = BCrypt.Net.BCrypt.HashPassword(userPasswordChangeDto.NewPasswordConfirmed);
-                UserPasswordChange userPasswordChange = new()
-                {
-                    UserAccountId = userPasswordChangeDto.UserAccountId,
-                    PasswordHash = password
-                };
-
-                await _userAccountsCommands.UpdatePassword(userPasswordChange);
-
-                return Results.Ok("Password has been updated!");
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem(ex.Message); 
-            }
-        }
-
         public async Task<IResult> UpdateAccount(UserAccountUpdateDto userDto)
         {
             try
             {
-                var userFromDb = await _userAccountsRepository.GetUser(userDto.UserAccountId);
+                var userId = _userAccessor.UserId;
+                var userFromDb = await _userAccountsRepository.GetUser(userId);
+
+                if(userFromDb == null || userFromDb.IsActive == false)
+                {
+                    return Results.Problem("User either does not exist or is inactive!");
+                }
+
                 var checkIfUserNameExists = await _userAccountsRepository.GetUserByName(userDto.UserName);
 
-                if (userFromDb != null)
+
+                if(checkIfUserNameExists != null)
                 {
-                    return Results.Problem("Invalid request! User does not exist");
+                    if (checkIfUserNameExists.UserName == userDto.UserName && checkIfUserNameExists.UserAccountId != userFromDb.UserAccountId)
+                    {
+                        return Results.Problem("Username already exists!");
+                    }
                 }
 
-                if (checkIfUserNameExists.UserName == userDto.UserName && checkIfUserNameExists.UserAccountId != userDto.UserAccountId)
+                var checkIfEmailExists = await _userAccountsRepository.GetUserByEmail(userDto.Email);
+
+                if(checkIfEmailExists != null)
                 {
-                    return Results.Problem("Username already exists!");
+                    if (checkIfEmailExists.Email == userDto.Email && checkIfEmailExists.UserAccountId != userFromDb.UserAccountId)
+                    {
+                        return Results.Problem("Email is already bound to a different account!");
+                    }
                 }
-                if (checkIfUserNameExists.Email == userDto.Email && checkIfUserNameExists.UserAccountId != userDto.UserAccountId)
-                {
-                    return Results.Problem("An account to which provided email is bound already exists! Please choose a different one or contact support for more details!");
-                }
+
                 if (!userDto.UserName.UserNameChecker())
                 {
                     return Results.Problem("Username must not contain any white spaces nor any special characters!");
                 }
-                if (!userDto.Email.UserNameChecker())
+                if (!userDto.Email.EmailChecker())
                 {
                     return Results.Problem("Email is not valid!");
                 }
 
                 UserAccountDto userAccountDto = new()
                 {
+                    UserAccountId = userFromDb.UserAccountId,
                     UserName = userDto.UserName,
                     Email = userDto.Email,
                     PicturePath = "",
@@ -380,6 +352,68 @@ namespace AuthApi.Managers.UserManager
                 var mappedList = _mapper.Map(list, userAccountLightDto);
 
                 return Results.Ok(mappedList);
+            }
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        }
+
+        public async Task<IResult> UpdatePassword(NewPasswordDto newPasswordDto)
+        {
+            try
+            {
+                ArgumentNullException.ThrowIfNull(newPasswordDto);
+
+                var userId = _userAccessor.UserId;
+                var userFromDb = await _userAccountsRepository.GetUser(userId);
+
+                if(userFromDb == null || userFromDb.IsActive == false)
+                {
+                    return Results.Problem("User either does not exist or is inactive!");
+                }
+
+                if (!BCrypt.Net.BCrypt.Verify(newPasswordDto.CurrentPassword, userFromDb!.PasswordHash))
+                {
+                    return Results.Problem("Current Password is not correct!");
+                }
+                else
+                {
+                    if(newPasswordDto.NewPassword != newPasswordDto.ConfirmPassword)
+                    {
+                        return Results.Problem($"Passwords do not match!");
+                    }
+
+                    if (newPasswordDto.ConfirmPassword.Length < _passwordLength)
+                    {
+                        return Results.Problem($"Password must contain minimum of {_passwordLength} characters!");
+                    }
+                    if (!newPasswordDto.ConfirmPassword.PasswordChecker())
+                    {
+                        return Results.Problem($"Password must contain low, upper character as well as a number and a special character such as ! or *");
+                    }
+
+                    var password = BCrypt.Net.BCrypt.HashPassword(newPasswordDto.ConfirmPassword);
+
+                    UserPasswordChange userPasswordChange = new()
+                    {
+                        PasswordHash = password,
+                        UserAccountId = userFromDb.UserAccountId
+                    };
+
+
+                    await _userAccountsCommands.UpdatePassword(userPasswordChange);
+
+                    var cookie = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(2));
+                    _userAccessor.SetCookie("ChatApp", _jwt.GenerateToken(userFromDb.UserName, userFromDb.RoleId), cookie);
+                    _userAccessor.SetCookie("ChatAppUserId", userFromDb.UserAccountId, cookie);
+                    return Results.Ok("Password has been changed!");
+                }
+;
             }
             catch (ArgumentNullException ex)
             {

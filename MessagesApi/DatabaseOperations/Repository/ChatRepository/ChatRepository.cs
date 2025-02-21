@@ -122,7 +122,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
             }
         } 
 
-        //This method gets wrong top 10 messages. Check what is going on later on!
+        //Limit about of messages in the future updates and work on the frontend to implement that feature
         public async Task<IEnumerable<Message>> GetChatMessages(ObjectId chatId)
         {
 
@@ -130,7 +130,8 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
             {
                 new BsonDocument("$match", new BsonDocument("_id", chatId)),
                 new BsonDocument("$unwind", "$Messages"),
-                //new BsonDocument("$limit", 10),
+                new BsonDocument("$sort", new BsonDocument("Messages.PostedDate", -1)),
+                //new BsonDocument("$limit", 100),
                 new BsonDocument("$project", new BsonDocument
                 {
                     { "_id", 0 },    

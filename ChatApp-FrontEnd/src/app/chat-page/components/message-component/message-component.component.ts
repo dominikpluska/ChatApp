@@ -1,5 +1,11 @@
 import { DatePipe, NgClass } from '@angular/common';
-import { Component, input } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  input,
+  ViewChild,
+} from '@angular/core';
 
 @Component({
   selector: 'app-message-component',

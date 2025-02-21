@@ -19,6 +19,7 @@ namespace UserSettingsApi
         public static WebApplication MapBlackListsEndpoints(this WebApplication app, IBlackListsManager blackListsManager)
         {
             app.MapGet("/GetBlackList", async () => await blackListsManager.GetBlackList());
+            app.MapGet("/GetUserFromBlackList/u={userId}/c={chatterId}", async (string userId, string chatterId) => await blackListsManager.GetUserFromBlackList(userId, chatterId));
             app.MapPost("/CreateBlackListTable/{userId}", async (string userId) => await blackListsManager.CreateBlackListTable(userId));
             app.MapPost("/AddToBlackList/{blockedId}", async (string blockedId) => await blackListsManager.AddUserToBlackList(blockedId));
             app.MapDelete("/RemoveFromBlackList/{blockedId}", async (string blockedId) => await blackListsManager.RemoveFromBlackList(blockedId));

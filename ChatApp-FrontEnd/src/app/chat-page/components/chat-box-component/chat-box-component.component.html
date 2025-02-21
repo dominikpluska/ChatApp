@@ -1,4 +1,4 @@
-<div>
+<div #chatbox (scroll)="onScroll($event)">
   @for (item of messages(); track item.messageId) {
   <app-message-component
     [currentuserId]="currentUserId()"

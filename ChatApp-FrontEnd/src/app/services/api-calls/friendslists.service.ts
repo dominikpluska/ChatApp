@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { userSettingsApi } from '../apipath';
 import { catchError, throwError } from 'rxjs';
 import { UserLight } from '../../models/userlight.model';
+import { SignalrRService } from '../signalr.service';
 
 @Injectable({ providedIn: 'root' })
 export class FriendsListService {

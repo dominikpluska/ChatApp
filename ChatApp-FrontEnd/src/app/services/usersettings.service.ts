@@ -67,6 +67,56 @@ export class UserSettings {
     );
   }
 
+  onRemoveFriend() {
+    this.signalRSevice.getHubConnection.on(
+      'OnRemoveFriend',
+      (userAccountId: string) => {
+        this.friendsList?.splice(
+          this.friendsList.findIndex((x) => x.userAccountId === userAccountId),
+          1
+        );
+      }
+    );
+  }
+
+  onAddFriend() {
+    this.signalRSevice.getHubConnection.on(
+      'OnAddFriend',
+      (friend: UserLight) => {
+        if (this.friendsList === undefined || this.friendsList === null) {
+          this.friendsList = [friend];
+        } else {
+          this.friendsList!.push(friend);
+        }
+      }
+    );
+  }
+
+  onBlockUser() {
+    this.signalRSevice.getHubConnection.on(
+      'OnBlockUser',
+      (blockedUser: UserLight) => {
+        if (this.blackList === undefined || this.blackList === null) {
+          this.blackList = [blockedUser];
+        } else {
+          this.blackList!.push(blockedUser);
+        }
+      }
+    );
+  }
+
+  onRemoveBlockedUser() {
+    this.signalRSevice.getHubConnection.on(
+      'OnRemoveBlockedUser',
+      (userAccountId: string) => {
+        this.blackList?.splice(
+          this.blackList.findIndex((x) => x.userAccountId === userAccountId),
+          1
+        );
+      }
+    );
+  }
+
   setUserProfile(id: string, userName: string) {
     this.userProfile.UserId = id;
     this.userProfile.UserName = userName;

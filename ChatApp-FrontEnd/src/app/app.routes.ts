@@ -9,6 +9,9 @@ import { BlackListPageComponent } from './main-page/pages/black-list-page/black-
 import { RequestsPageComponent } from './main-page/pages/requests-page/requests-page.component';
 import { SearchPageComponent } from './main-page/pages/search-page/search-page.component';
 import { ChatPageComponent } from './chat-page/chat-page.component';
+import { MainViewComponent } from './main-page/pages/main-view/main-view.component';
+import { ChangePasswordFormComponent } from './authentication-page/change-password-form/change-password-form.component';
+import { ChangeSettingsFormComponent } from './authentication-page/change-settings-form/change-settings-form.component';
 
 export const routes: Routes = [
   {
@@ -20,6 +23,10 @@ export const routes: Routes = [
     path: 'main',
     component: MainPageComponent,
     children: [
+      {
+        path: '',
+        component: MainViewComponent,
+      },
       {
         path: 'chats',
         component: ChatsPageComponent,
@@ -54,5 +61,15 @@ export const routes: Routes = [
   {
     path: 'register',
     component: RegisterFormComponent,
+  },
+  {
+    path: 'change-password',
+    component: ChangePasswordFormComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'change-settings',
+    component: ChangeSettingsFormComponent,
+    canActivate: [AuthGuard],
   },
 ];

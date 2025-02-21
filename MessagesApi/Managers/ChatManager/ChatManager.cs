@@ -19,10 +19,12 @@ namespace MessagesApi.Managers.ChatManager
         private readonly IUserAccessor _userAccessor;
         private readonly IMapper _mapper;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IUserSettingsService _userSettingsService;
         private readonly IHubContext<MessagesHub.MessagesHub> _hubContext;
 
         public ChatManager(IChatCommands chatCommands, IChatRepository chatRepository, IUserAccessor userAccessor,
-            IMapper mapper, IAuthenticationService authenticationService, IHubContext<MessagesHub.MessagesHub> hubContext)
+            IMapper mapper, IAuthenticationService authenticationService, IHubContext<MessagesHub.MessagesHub> hubContext,
+            IUserSettingsService userSettingsService)
         {
             _authenticationService = authenticationService;
             _chatCommands = chatCommands;
@@ -30,6 +32,7 @@ namespace MessagesApi.Managers.ChatManager
             _userAccessor = userAccessor;
             _hubContext = hubContext;
             _mapper = mapper;
+            _userSettingsService = userSettingsService;
         }
 
         //Currently working on
@@ -51,6 +54,13 @@ namespace MessagesApi.Managers.ChatManager
                 if(userProperties.UserAccountId == chatterId)
                 {
                     return Results.Problem("You can't have chat with yourself silly!");
+                }
+
+                var checkIfBlocked = await _userSettingsService.CheckIfUserIsBlocked(userProperties.UserAccountId, chatterId);
+
+                if(checkIfBlocked != null)
+                {
+                    return Results.Problem("You are being blocked by this user!");
                 }
 
                 var chatterProperties = await _authenticationService.GetAccountProperties(chatterId);
@@ -93,121 +103,6 @@ namespace MessagesApi.Managers.ChatManager
                 return Results.Problem(ex.Message);
             }
         }
-
-        //public async Task<IResult> SendChatRequest(ChatRequestDto chatRequestDto)
-        //{
-        //    try
-        //    {
-        //        ArgumentNullException.ThrowIfNull(chatRequestDto);
-        //        var userId = _userAccessor.UserId;
-        //        var userProperties = await _authenticationService.GetAccountProperties(userId);
-
-        //        if (userProperties == null || !userProperties.IsActive)
-        //        {
-        //            return Results.Problem("User does not exist or is inactive!");
-        //        }
-
-        //        foreach (var user in chatRequestDto.RequestRecipient)
-        //        {
-        //            var requestRecipient = await _authenticationService.GetAccountProperties(user);
-
-        //            if (requestRecipient == null || requestRecipient.IsActive == false)
-        //            {
-        //                chatRequestDto.RequestRecipient.Remove(user);
-        //            }
-        //        }
-
-        //        List<ChatParticipant> chatParticipants = new List<ChatParticipant>()
-        //        {
-        //            new ChatParticipant()
-        //            {
-        //                UserId = userProperties.UserAccountId,
-        //                IsAccepted = true,
-        //            }
-        //        };
-
-
-        //        foreach (var requestRecipient in chatRequestDto.RequestRecipient)
-        //        {
-        //            ChatParticipant chatParticipant = new()
-        //            {
-        //                UserId = requestRecipient,
-        //                IsAccepted = false,
-        //            };
-
-        //            chatParticipants.Add(chatParticipant);
-        //        }
-
-        //        Chat chat = new Chat()
-        //        {
-        //            ChatParticipants = chatParticipants
-        //        };
-
-        //        await _chatCommands.CreateChat(chat);
-
-        //        //Push Notification if successfull
-
-        //        return Results.Ok("Chat has been created!");
-
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return Results.Problem("Argument Null Exception!", ex.Message);
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Results.Problem(ex.Message);
-        //    }
-
-        //}
-
-        //public async Task<IResult> AcceptChatRequest(AcceptChatRequestDto acceptChatRequestDto)
-        //{
-        //    try
-        //    {
-        //        ArgumentNullException.ThrowIfNull(acceptChatRequestDto);
-        //        var userId = _userAccessor.UserId;
-        //        var userProperties = await _authenticationService.GetAccountProperties(userId);
-
-
-        //        if (userProperties == null || !userProperties.IsActive)
-        //        {
-        //            return Results.Problem("User does not exist or is inactive!");
-        //        }
-
-        //        var chatId = await _chatRepository.CheckChat(ObjectId.Parse(acceptChatRequestDto.ChatId));
-
-        //        //To be tested!
-        //        if (chatId == null)
-        //        {
-        //            return Results.Problem("Chat does not exits!");
-        //        }
-
-        //        var chatParticipants = await _chatRepository.GetChatParticipants(chatId);
-
-        //        var getChatParticipant = chatParticipants.Where(x => x.UserId == userId).FirstOrDefault();
-        //        if (getChatParticipant == null)
-        //        {
-        //            return Results.Problem("The user isn't a part of the chat session!");
-        //        }
-
-        //        await _chatCommands.AcceptChatRequest(chatId, getChatParticipant.UserId);
-
-        //        return Results.Ok("Accepted!");
-
-        //    }
-        //    catch (ArgumentNullException ex)
-        //    {
-        //        return Results.Problem("Argument Null Exception!", ex.Message);
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Results.Problem(ex.Message);
-        //    }
-
-        //}
 
         public async Task<IResult> PostMessage(MessageDto messageDto)
         {
@@ -273,7 +168,6 @@ namespace MessagesApi.Managers.ChatManager
                 if (userProperties == null || !userProperties.IsActive)
                 {
                     return Results.Problem("User is disabled or incative!");
-                    //await Clients.Caller.SendAsync(nameof(GetMessages), "User is disabled or incative!");
                 }
 
                 var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
@@ -282,12 +176,10 @@ namespace MessagesApi.Managers.ChatManager
                 if (checkUser == null)
                 {
                     return Results.Problem("User is not a chat participant!");
-                    //await Clients.Caller.SendAsync(nameof(GetMessages), "User is not a chat participant!");
                 }
 
                 var result = await _chatRepository.GetChatMessages(chatIdParsed);
 
-                //await Clients.Caller.SendAsync(nameof(GetMessages), result);
 
                 List<MessageRetrivedDto> messageRetrivedDtos = new();
 
@@ -309,18 +201,16 @@ namespace MessagesApi.Managers.ChatManager
                 }).ToList();
 
                 return Results.Ok(new { users = userList, messages = mergedList });
-                //await Clients.Caller.SendAsync(nameof(GetMessages), new { users = userList, messages = mergedList });
             }
+
             catch (ArgumentNullException ex)
             {
                 return Results.Problem("Argument Null Exception!", ex.Message);
-                //await Clients.Caller.SendAsync(nameof(GetMessages), "Argument Null Exception!", ex.Message);
 
             }
             catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
-                //await Clients.Caller.SendAsync(nameof(GetMessages), ex.Message);
             }
         }
 

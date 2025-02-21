@@ -1,4 +1,5 @@
-﻿using UserSettingsApi.DatabaseOperations.Commands.BlackListCommands;
+﻿using Microsoft.AspNetCore.SignalR;
+using UserSettingsApi.DatabaseOperations.Commands.BlackListCommands;
 using UserSettingsApi.DatabaseOperations.Commands.FriendsLisiCommands;
 using UserSettingsApi.DatabaseOperations.Repository.BlackListRepository;
 using UserSettingsApi.DatabaseOperations.Repository.FriendsListRepository;
@@ -17,10 +18,12 @@ namespace UserSettingsApi.Managers.BlackListsManager
         private readonly IFriendListCommands _friendListCommands;
         private readonly IFriendsListRepository _friendsListRepository;
         private readonly IUserAccessor _userAccessor;
+        private readonly IHubContext<UserSettingsHub.UserSettingsHub> _hubContext;
 
         public BlackListsManager(IUserAccessor userAccessor, IBlackListCommands blackListCommands,
             IBlackListRepository blackListRepository, IAuthenticationService authenticationService,
-            IFriendListCommands friendListCommands, IFriendsListRepository friendsListRepository)
+            IFriendListCommands friendListCommands, IFriendsListRepository friendsListRepository,
+            IHubContext<UserSettingsHub.UserSettingsHub> hubContext)
         {
             _userAccessor = userAccessor;
             _blackListRepository = blackListRepository;
@@ -28,6 +31,7 @@ namespace UserSettingsApi.Managers.BlackListsManager
             _authenticationService = authenticationService;
             _friendListCommands = friendListCommands;
             _friendsListRepository = friendsListRepository;
+            _hubContext = hubContext;
         }
 
         public async Task<IResult> CreateBlackListTable(string userId)
@@ -107,8 +111,65 @@ namespace UserSettingsApi.Managers.BlackListsManager
 
                 await _friendListCommands.RemoveFriend(blockedFriendsListId, userProperties.UserAccountId);
 
+                var userConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(userProperties.UserAccountId);
+                if (userConnectionId != null)
+                {
+                    UserAccountLightDto userAccountLightDto = new()
+                    {
+                        UserAccountId = newBlockedUser.UserAccountId,
+                        UserName = newBlockedUser.UserName
+                    };
+                    await _hubContext.Clients.Client(userConnectionId).SendAsync("OnBlockUser", userAccountLightDto);
+                    await _hubContext.Clients.Client(userConnectionId).SendAsync("OnRemoveFriend", newBlockedUser.UserAccountId);
+                }
+
+                var blockedUserConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(newBlockedUser.UserAccountId);
+
+                if(blockedUserConnectionId != null)
+                {
+                    await _hubContext.Clients.Client(blockedUserConnectionId).SendAsync("OnRemoveFriend", userProperties.UserAccountId);
+                }
+
                 return Results.Ok("User has been blocked!");
 
+            }
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem("Argument Null Exception!", ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
+        }
+
+        public async Task<IResult> GetUserFromBlackList(string userId, string chatterId)
+        {
+            try
+            {
+                //var userId = _userAccessor.UserId;
+                //var userProperties = await _authenticationService.GetAccountProperties(userId);
+
+                //if (userProperties == null)
+                //{
+                //    return Results.Problem("User does not exist!");
+                //}
+
+                //if (!userProperties.IsActive)
+                //{
+                //    return Results.Problem("User is inactive!");
+                //}
+
+                var blackListId = await _blackListRepository.GetBlackListId(chatterId);
+
+                if(blackListId == null)
+                {
+                    return Results.Problem("Black list is empty! Fix this issue!");
+                }
+
+                var checkIfBlocked = await _blackListRepository.GetBlockedUser(blackListId, userId);
+
+                return Results.Ok(checkIfBlocked);
             }
             catch (ArgumentNullException ex)
             {
@@ -149,6 +210,13 @@ namespace UserSettingsApi.Managers.BlackListsManager
                 var blackListId = await _blackListRepository.GetBlackListId(userProperties.UserAccountId);
 
                 await _blackListCommands.RemoveFromBlackList(blackListId, blockedUserId);
+
+
+                var userConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(userProperties.UserAccountId);
+                if (userConnectionId != null)
+                {
+                    await _hubContext.Clients.Client(userConnectionId).SendAsync("OnRemoveBlockedUser", blockedUserId);
+                }
 
                 return Results.Ok("User has been removed from the blacklist!");
 

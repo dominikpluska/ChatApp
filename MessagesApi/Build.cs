@@ -20,6 +20,7 @@ namespace MessagesApi
             builder.Services.AddScoped<IChatRepository, ChatRepository>();
             builder.Services.AddScoped<IUserAccessor, HttpUserAccessor>();
             builder.Services.AddScoped<IChatManager, ChatManager>();
+            builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddSingleton<MongoDBService>();
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
