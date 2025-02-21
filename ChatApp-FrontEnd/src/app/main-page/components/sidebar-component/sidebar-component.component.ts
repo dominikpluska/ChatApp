@@ -15,6 +15,7 @@ export class SidebarComponentComponent {
     'black-list',
     'requests',
     'search',
+    '',
   ];
 
   onSelect(index: number) {

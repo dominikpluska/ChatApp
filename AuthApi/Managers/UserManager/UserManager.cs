@@ -184,6 +184,7 @@ namespace AuthApi.Managers.UserManager
                     UserAccountId = userFromDb.UserAccountId,
                     UserName = userDto.UserName,
                     Email = userDto.Email,
+                    IsActive = userFromDb.IsActive,
                     PicturePath = "",
 
                 };

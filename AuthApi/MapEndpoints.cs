@@ -1,6 +1,7 @@
 ﻿using AuthApi.Dto;
 using AuthApi.Managers.AdminManager;
 using AuthApi.Managers.UserManager;
+using AuthApi.UserAccessor;
 using System.Runtime.CompilerServices;
 
 namespace AuthApi
@@ -9,12 +10,15 @@ namespace AuthApi
     {
         public static WebApplication MapUserEndpoints(this WebApplication app, IUserManager userManager)
         {
-            app.MapPost("/Register", async (UserRegistrationDto userDto) => await userManager.RegisterNewUser(userDto));
-            app.MapPost("/Login", async (UserLoginDto loginDto) => await userManager.Login(loginDto));
+            using var scope = app.Services.CreateScope();
+            var userAccessor = scope.ServiceProvider.GetRequiredService<IUserAccessor>();
+
+            app.MapPost("/Register", async (UserRegistrationDto userDto) => await userManager.RegisterNewUser(userDto)).AllowAnonymous();
+            app.MapPost("/Login", async (UserLoginDto loginDto) => await userManager.Login(loginDto)).AllowAnonymous();
+            app.MapGet("/AuthCheck", async () => await userManager.CheckAuthentication()).AllowAnonymous();
             app.MapPost("/Logout", async () => await userManager.LogOut());
             app.MapPost("/ChangePassword", async (NewPasswordDto passwordChange) => await userManager.UpdatePassword(passwordChange));
             app.MapPost("/UpdateUser", async (UserAccountUpdateDto userDto) => await userManager.UpdateAccount(userDto));
-            app.MapGet("/AuthCheck", async () => await userManager.CheckAuthentication());
             app.MapGet("/GetAccountProperties", async (string userId) => await userManager.GetAccountProperties(userId));
             app.MapGet("/GetActiveUserList", async () => await userManager.GetActiveUserList());
             app.MapGet("/GetActiveUserList/s={itemsToSkip}", async (int itemsToSkip) => await userManager.GetActiveUserList(itemsToSkip));

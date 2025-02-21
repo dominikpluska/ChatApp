@@ -12,6 +12,7 @@ using AuthApi.Managers.UserManager;
 using AuthApi.UserAccessor;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -70,6 +71,13 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+    .RequireAuthenticatedUser()
+    .Build();
+});
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
@@ -97,7 +105,8 @@ using var scope = app.Services.CreateScope();
 var userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
 var adminManager = scope.ServiceProvider.GetRequiredService<IAdminManager>();
 
-app.MapUserEndpoints(userManager).MapAdminEndpoints(adminManager);
+app.MapUserEndpoints(userManager)
+    .MapAdminEndpoints(adminManager);
 app.GenerateDatabase();
 app.Run();
 
