@@ -25,7 +25,7 @@ namespace AuthApi.Managers.UserManager
         private readonly IUserAccessor _userAccessor;
         private readonly IMapper _mapper;
         private readonly IUserSettingsService _userSettingsService;
-        private readonly int _passwordLength = 8;
+        //private readonly int _passwordLength = 8;
         private readonly int _pagination = 20;
 
         public UserManager(IUserAccountsRepository userAccountsRepository, IUserAccountsCommands userAccountsCommands, IJwt jwt, ICookieGenerator cookieGenerator,
@@ -45,6 +45,8 @@ namespace AuthApi.Managers.UserManager
         {
             try
             {
+                ArgumentNullException.ThrowIfNull(userDto);
+
                 var checkIfUserNameExists = await _userAccountsRepository.GetUserByName(userDto.UserName);
                 if (checkIfUserNameExists != null)
                 {
@@ -63,13 +65,10 @@ namespace AuthApi.Managers.UserManager
                     return Results.Problem("Username must not contain any white spaces nor any special characters!");
                 }
 
-                if (userDto.Password.Length < _passwordLength)
-                {
-                    return Results.Problem($"Password must contain minimum of {_passwordLength} characters!");
-                }
                 if (!userDto.Password.PasswordChecker())
                 {
-                    return Results.Problem($"Password must contain low, upper character as well as a number and a special character such as ! or *");
+                    return Results.Problem($"Password must contain low, upper character as well as a number " +
+                        $"a special character such as ! or * and at least 8 characters");
                 }
                 if (!userDto.Email.EmailChecker())
                 {
@@ -90,13 +89,15 @@ namespace AuthApi.Managers.UserManager
 
                 var userAccountId = await _userAccountsCommands.AddNewUser(userRegistration);
 
-                //var userFromDb = await _userAccountsRepository.GetUserByName(userDto.UserName);
-
                 //If any error occurs in the line below, drop username from db
 
                 await _userSettingsService.CreateUserSettings(userAccountId);
 
                 return Results.Ok("User has been registered!");
+            }
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem("Argument Null Exception!", ex.Message);
             }
             catch (Exception ex)
             {
@@ -109,6 +110,7 @@ namespace AuthApi.Managers.UserManager
         {
             try
             {
+                ArgumentNullException.ThrowIfNull(userLoginDto);
                 var userFromDb = await _userAccountsRepository.GetUserByName(userLoginDto.UserName);
 
                 if (userFromDb == null)
@@ -130,6 +132,10 @@ namespace AuthApi.Managers.UserManager
                         return Results.Ok("Login successful");
                     }
                 }
+            }
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem("Argument Null Exception!", ex.Message);
             }
             catch (Exception ex)
             {
@@ -389,13 +395,10 @@ namespace AuthApi.Managers.UserManager
                         return Results.Problem($"Passwords do not match!");
                     }
 
-                    if (newPasswordDto.ConfirmPassword.Length < _passwordLength)
-                    {
-                        return Results.Problem($"Password must contain minimum of {_passwordLength} characters!");
-                    }
                     if (!newPasswordDto.ConfirmPassword.PasswordChecker())
                     {
-                        return Results.Problem($"Password must contain low, upper character as well as a number and a special character such as ! or *");
+                        return Results.Problem($"Password must contain low, upper character as well as a number " +
+                                                    $"a special character such as ! or * and at least 8 characters");
                     }
 
                     var password = BCrypt.Net.BCrypt.HashPassword(newPasswordDto.ConfirmPassword);

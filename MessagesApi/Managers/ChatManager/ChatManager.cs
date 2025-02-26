@@ -2,13 +2,12 @@
 using MessagesApi.DatabaseOperations.Commands.ChatCommands;
 using MessagesApi.DatabaseOperations.Repository.ChatRepository;
 using MessagesApi.Dto;
-using MessagesApi.MessagesHub;
 using MessagesApi.Models;
 using MessagesApi.Services;
 using MessagesApi.UserAccessor;
 using Microsoft.AspNetCore.SignalR;
 using MongoDB.Bson;
-using System.Reflection;
+
 
 namespace MessagesApi.Managers.ChatManager
 {

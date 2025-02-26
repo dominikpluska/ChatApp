@@ -4,8 +4,8 @@ namespace AuthApi.Helper
 {
     public static class StringChecker
     {
-        private static readonly string _passwordPattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?"":{}|<>]).+$";
-        private static readonly string _userNamePattern = @"^[a-zA-Z0-9_]+$";
+        private static readonly string _passwordPattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?"":{}|<>]).{8,}$";
+        private static readonly string _userNamePattern = @"^[a-zA-Z0-9_]{4,}$";
         private static readonly string _emailPattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
         public static bool PasswordChecker(this string password)
         {

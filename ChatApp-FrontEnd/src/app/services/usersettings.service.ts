@@ -1,11 +1,10 @@
-import { ChangeDetectorRef, inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { UserProfile } from '../models/userprofile.model';
 import { AppRequest } from '../models/apprequest.model';
 import { UserLight } from '../models/userlight.model';
 import { SignalrRService } from './signalr.service';
 import { userSettingsApi } from './apipath';
 import { ToastrService } from 'ngx-toastr';
-import { BehaviorSubject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class UserSettings {
@@ -155,12 +154,6 @@ export class UserSettings {
   }
 
   set setRequestsList(requests: AppRequest[]) {
-    //this.requestsList.next(requests);
     this.requestsList = requests;
   }
-
-  // addRequest(request: AppRequest) {
-  //   const currentValue = this.requestsList.value;
-  //   this.requestsList.next([...currentValue, request]);
-  // }
 }

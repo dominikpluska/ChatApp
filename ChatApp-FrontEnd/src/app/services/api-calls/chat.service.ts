@@ -15,7 +15,6 @@ export class ChatService {
   private signalRSevice = inject(SignalrRService);
   private messages!: MessageReceived[];
   private chatParticipants!: UserLight[];
-  private toastr = inject(ToastrService);
 
   startSignalRConnection(chatId: string) {
     this.signalRSevice
@@ -55,7 +54,7 @@ export class ChatService {
     this.signalRSevice.getHubConnection.on(
       'ReceiveMessage',
       (response: MessageReceived) => {
-        this.messages.push(response);
+        this.messages.unshift(response);
       }
     );
   }
