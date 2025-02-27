@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, NgZone } from '@angular/core';
 import { messageApi } from '../apipath';
-import { catchError, throwError } from 'rxjs';
+import { catchError, finalize, throwError } from 'rxjs';
 import { MessageReceived } from '../../models/messagereceived.model';
 import { FormGroup } from '@angular/forms';
 import { MessagePosted } from '../../models/messageposted.model';
@@ -15,6 +15,7 @@ export class ChatService {
   private signalRSevice = inject(SignalrRService);
   private messages!: MessageReceived[];
   private chatParticipants!: UserLight[];
+  private isLoading: boolean = false;
 
   startSignalRConnection(chatId: string) {
     this.signalRSevice
@@ -29,9 +30,11 @@ export class ChatService {
   }
 
   getChat(chatterId: string) {
+    this.isLoading = true;
     return this.htppClient
       .get<string>(`${messageApi}OpenChat/${chatterId}`)
       .pipe(
+        finalize(() => (this.isLoading = false)),
         catchError((error) => {
           const errorMessage = error.error.detail;
           return throwError(() => new Error(errorMessage));
@@ -76,6 +79,10 @@ export class ChatService {
 
   get getMessages() {
     return this.messages;
+  }
+
+  get getIsLoading() {
+    return this.isLoading;
   }
 
   set setMessages(messages: MessageReceived[]) {

@@ -10,9 +10,11 @@ using AuthApi.Models;
 using AuthApi.Services;
 using AuthApi.UserAccessor;
 using AutoMapper;
+using BCrypt.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -52,8 +54,6 @@ namespace Tests.AuthApiTests
             _userSettingsService = new Mock<IUserSettingsService>();
         }
 
-        //Next tests:
-        //Test Login function
 
         #region RegisterNewUserTests
         [Fact]
@@ -214,6 +214,57 @@ namespace Tests.AuthApiTests
         }
         #endregion
 
+        #region LoginTests
+        [Theory]
+        [UserLogin]
+        public async Task Login_GivenTheCorrectCredentials_ReturnResultOK(UserLoginDto userLoginDto)
+        {
+            UserLoginDto userLoginCorrectCredentials = new()
+            {
+                UserName = "TestUserName",
+                Password = "VeryStrongPassword2025!"
+            };
 
+            var wasPasswordCorrect = userLoginCorrectCredentials.Password == userLoginDto.Password;
+
+            _userManager.Setup(x => x.Login(userLoginDto)).ReturnsAsync(Results.Ok(""));
+
+            var httpResponse = wasPasswordCorrect ? await _userManager.Object.Login(userLoginDto) : Results.Problem("");
+
+            Assert.IsType<Ok<string>>(httpResponse);
+        }
+        [Theory]
+        [UserLogin]
+        public async Task Login_GivenIncorrectCredentials_ReturnResultsProblem(UserLoginDto userLoginDto)
+        {
+            UserLoginDto userLoginCorrectCredentials = new()
+            {
+                UserName = "TestUserName",
+                Password = "VeryStrongPassword2025!!"
+            };
+
+            var wasPasswordCorrect = userLoginCorrectCredentials.Password == userLoginDto.Password;
+
+            _userManager.Setup(x => x.Login(userLoginDto)).ReturnsAsync(Results.Ok(""));
+
+            var httpResponse = wasPasswordCorrect ? await _userManager.Object.Login(userLoginDto) : Results.Problem("");
+
+            Assert.IsType<ProblemHttpResult>(httpResponse);
+        }
+
+        [Theory]
+        [UserLoginDtoNull]
+        public async Task Login_GivenNullUser_ThrowExceptionAndReturnProblem(UserLoginDto userLoginDto)
+        {
+            var isException = userLoginDto.Password == null && userLoginDto.UserName == null
+                ? new ArgumentNullException() : null;
+            _userManager.Setup(x => x.Login(userLoginDto)).ReturnsAsync(Results.Problem(""));
+
+            var httpResponse = isException != null ? await _userManager.Object.Login(userLoginDto) :
+                                null;
+
+            Assert.IsType<ProblemHttpResult>(httpResponse);
+        }
+        #endregion
     }
 }

@@ -7,6 +7,7 @@ import { NothingToDisplayComponent } from '../../../global-components/nothing-to
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ChatService } from '../../../services/api-calls/chat.service';
+import { LoadingComponentComponent } from '../../../global-components/loading-component/loading-component.component';
 
 @Component({
   selector: 'app-friends-page',
@@ -15,6 +16,7 @@ import { ChatService } from '../../../services/api-calls/chat.service';
     TinyItemComponentComponent,
     TinyButtonComponentComponent,
     NothingToDisplayComponent,
+    LoadingComponentComponent,
   ],
   templateUrl: './friends-page.component.html',
   styleUrl: './friends-page.component.css',
@@ -46,6 +48,10 @@ export class FriendsPageComponent implements OnInit {
 
   get getUserSettings() {
     return this.userSettings;
+  }
+
+  get isLoading() {
+    return this.friendsListService.getIsLoading;
   }
 
   onChatRoute(userId: string) {

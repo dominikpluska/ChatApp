@@ -1,6 +1,8 @@
 <div class="container">
   <p>Requests List</p>
-  @if(getUserSettings.getRequestsList === undefined ||
+  @if(isLoading){
+  <app-loading-component text="Getting requests list" />
+  } @else { @if(getUserSettings.getRequestsList === undefined ||
   getUserSettings.getRequestsList === null ||
   getUserSettings.getRequestsList!.length === 0){
   <app-nothing-to-display />
@@ -26,5 +28,5 @@
     </app-tiny-item-component>
     }
   </div>
-  }
+  } }
 </div>

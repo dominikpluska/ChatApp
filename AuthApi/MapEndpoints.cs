@@ -2,6 +2,7 @@
 using AuthApi.Managers.AdminManager;
 using AuthApi.Managers.UserManager;
 using AuthApi.UserAccessor;
+using Microsoft.AspNetCore.Authorization;
 using System.Runtime.CompilerServices;
 
 namespace AuthApi
@@ -13,7 +14,7 @@ namespace AuthApi
             using var scope = app.Services.CreateScope();
             var userAccessor = scope.ServiceProvider.GetRequiredService<IUserAccessor>();
 
-            app.MapPost("/Register", async (UserRegistrationDto userDto) => await userManager.RegisterNewUser(userDto)).AllowAnonymous();
+            app.MapPost("/Register", async  (UserRegistrationDto userDto) => await userManager.RegisterNewUser(userDto)).AllowAnonymous();
             app.MapPost("/Login", async (UserLoginDto loginDto) => await userManager.Login(loginDto)).AllowAnonymous();
             app.MapGet("/AuthCheck", async () => await userManager.CheckAuthentication()).AllowAnonymous();
             app.MapPost("/Logout", async () => await userManager.LogOut());

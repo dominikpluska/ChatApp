@@ -1,18 +1,19 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { userSettingsApi } from '../apipath';
-import { catchError, throwError } from 'rxjs';
+import { catchError, finalize, throwError } from 'rxjs';
 import { UserLight } from '../../models/userlight.model';
-import { SignalrRService } from '../signalr.service';
-
 @Injectable({ providedIn: 'root' })
 export class FriendsListService {
   private htppClient: HttpClient = inject(HttpClient);
+  private isLoading: boolean = false;
 
   getFriendsList() {
+    this.isLoading = true;
     return this.htppClient
       .get<UserLight[]>(`${userSettingsApi}GetAllFriends`)
       .pipe(
+        finalize(() => (this.isLoading = false)),
         catchError((error) => {
           const errorMessage = error.error.detail;
           return throwError(() => new Error(errorMessage));
@@ -62,5 +63,9 @@ export class FriendsListService {
           return throwError(() => new Error(errorMessage));
         })
       );
+  }
+
+  get getIsLoading() {
+    return this.isLoading;
   }
 }

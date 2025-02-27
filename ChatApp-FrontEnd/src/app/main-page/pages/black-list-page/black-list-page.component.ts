@@ -5,6 +5,7 @@ import { NothingToDisplayComponent } from '../../../global-components/nothing-to
 import { TinyItemComponentComponent } from '../../../global-components/tiny-item-component/tiny-item-component.component';
 import { TinyButtonComponentComponent } from '../../../global-components/tiny-button-component/tiny-button-component.component';
 import { ToastrService } from 'ngx-toastr';
+import { LoadingComponentComponent } from '../../../global-components/loading-component/loading-component.component';
 
 @Component({
   selector: 'app-black-list-page',
@@ -13,6 +14,7 @@ import { ToastrService } from 'ngx-toastr';
     NothingToDisplayComponent,
     TinyItemComponentComponent,
     TinyButtonComponentComponent,
+    LoadingComponentComponent,
   ],
   templateUrl: './black-list-page.component.html',
   styleUrl: './black-list-page.component.css',
@@ -55,5 +57,9 @@ export class BlackListPageComponent {
 
   get getUserSettings() {
     return this.userSettings;
+  }
+
+  get isLoading() {
+    return this.blackListService.getIsLoading;
   }
 }

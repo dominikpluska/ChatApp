@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.AuthApiTests.Data
 {
-    public class TestData
+    public class InvalidTestData
     {
         public static IEnumerable<object[]> NullUserRegistrationDto =>
         new List<object[]>
@@ -23,6 +23,19 @@ namespace Tests.AuthApiTests.Data
                 }
             }
         };
+
+        public static IEnumerable<object[]> NullUserLoginDto =>
+            new List<object[]>
+            {
+                new object[]
+                {
+                    new UserLoginDto
+                    {
+                        UserName = null,
+                        Password = null
+                    }
+                }
+            };
 
     }
 }

@@ -1,17 +1,20 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { userSettingsApi } from '../apipath';
-import { catchError, throwError } from 'rxjs';
+import { catchError, finalize, throwError } from 'rxjs';
 import { UserLight } from '../../models/userlight.model';
 
 @Injectable({ providedIn: 'root' })
 export class BlackListService {
   private htppClient: HttpClient = inject(HttpClient);
+  private isLoading: boolean = false;
 
   getBlackList() {
+    this.isLoading = true;
     return this.htppClient
       .get<UserLight[]>(`${userSettingsApi}GetBlackList`)
       .pipe(
+        finalize(() => (this.isLoading = false)),
         catchError((error) => {
           const errorMessage = error.status;
           return throwError(() => new Error(errorMessage));
@@ -39,5 +42,9 @@ export class BlackListService {
           return throwError(() => new Error(errorMessage));
         })
       );
+  }
+
+  get getIsLoading() {
+    return this.isLoading;
   }
 }

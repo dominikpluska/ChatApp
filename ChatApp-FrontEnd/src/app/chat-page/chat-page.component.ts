@@ -36,7 +36,6 @@ import { UserSettings } from '../services/usersettings.service';
 })
 export class ChatPageComponent implements OnInit, OnDestroy {
   chatId = input.required<string>();
-  chatterName = input<string>('TestAccount');
 
   private userSettings = inject(UserSettings);
   private chatService = inject(ChatService);
@@ -112,5 +111,9 @@ export class ChatPageComponent implements OnInit, OnDestroy {
 
   get getChatParticipants() {
     return this.chatService.getChatParticipants;
+  }
+
+  get getIsLoading() {
+    return this.chatService.getIsLoading;
   }
 }

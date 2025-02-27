@@ -12,6 +12,7 @@ import { UserSettings } from '../../../services/usersettings.service';
 import { RequestsService } from '../../../services/api-calls/requests.service';
 import { FriendsListService } from '../../../services/api-calls/friendslists.service';
 import { ToastrService } from 'ngx-toastr';
+import { LoadingComponentComponent } from '../../../global-components/loading-component/loading-component.component';
 
 @Component({
   selector: 'app-requests-page',
@@ -20,6 +21,7 @@ import { ToastrService } from 'ngx-toastr';
     NothingToDisplayComponent,
     TinyItemComponentComponent,
     TinyButtonComponentComponent,
+    LoadingComponentComponent,
   ],
   templateUrl: './requests-page.component.html',
   styleUrl: './requests-page.component.css',
@@ -75,5 +77,9 @@ export class RequestsPageComponent implements OnInit {
 
   get getUserSettings() {
     return this.userSettings;
+  }
+
+  get isLoading() {
+    return this.requestsService.getIsLoading;
   }
 }

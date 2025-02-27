@@ -1,6 +1,7 @@
 <div class="container">
   <p>Black List</p>
-  @if(!getUserSettings.getBlackList || getUserSettings.getBlackList.length ===
+  @if(isLoading){ <app-loading-component text="Getting Black List..." /> } @else
+  { @if(!getUserSettings.getBlackList || getUserSettings.getBlackList.length ===
   0){
   <app-nothing-to-display />
   } @else {
@@ -17,5 +18,5 @@
     </app-tiny-item-component>
     }
   </div>
-  }
+  } }
 </div>

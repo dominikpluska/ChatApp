@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, NgZone, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -13,6 +13,7 @@ import { BlackListService } from '../../../services/api-calls/blacklist.service'
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ChatService } from '../../../services/api-calls/chat.service';
+import { LoadingComponentComponent } from '../../../global-components/loading-component/loading-component.component';
 
 @Component({
   selector: 'app-search-page',
@@ -21,6 +22,7 @@ import { ChatService } from '../../../services/api-calls/chat.service';
     ReactiveFormsModule,
     TinyItemComponentComponent,
     TinyButtonComponentComponent,
+    LoadingComponentComponent,
   ],
   templateUrl: './search-page.component.html',
   styleUrl: './search-page.component.css',
@@ -28,6 +30,7 @@ import { ChatService } from '../../../services/api-calls/chat.service';
 export class SearchPageComponent implements OnInit {
   private submitted: boolean = false;
   private isSearched: boolean = false;
+  private isActive: boolean = false;
   private searchService = inject(SearchService);
   private friendsListService = inject(FriendsListService);
   private blackListService = inject(BlackListService);
@@ -36,10 +39,6 @@ export class SearchPageComponent implements OnInit {
   private currentPaginationSelection = 1;
   private router = inject(Router);
   private tastr = inject(ToastrService);
-  private zone = inject(NgZone);
-
-  //implement adding and blocking users from this view
-  //implement chat route
 
   searchPatternForm = new FormGroup({
     searchPattern: new FormControl<string>('', [
@@ -54,6 +53,7 @@ export class SearchPageComponent implements OnInit {
         next: (response) => {
           this.searchService.setSearchUserList = response.userList;
           this.searchService.setUserPaginationCount = response.activeUsersCount;
+          this.isActive = true;
         },
         error: (error) => {
           console.log(error);
@@ -121,6 +121,14 @@ export class SearchPageComponent implements OnInit {
 
   get getSubmitted() {
     return this.submitted;
+  }
+
+  get getIsActive() {
+    return this.isActive;
+  }
+
+  get isLoading() {
+    return this.searchService.GetIsLoading;
   }
 
   set setPaginationSelection(pagination: number) {

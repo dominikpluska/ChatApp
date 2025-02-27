@@ -1,7 +1,8 @@
 <div class="container">
   <p>Friends List</p>
-  @if(!getUserSettings.getFriendsList || getUserSettings.getFriendsList.length
-  === 0){
+  @if(isLoading) {<app-loading-component text="Fetching Friends List..." />
+  } @else { @if(!getUserSettings.getFriendsList ||
+  getUserSettings.getFriendsList.length === 0){
   <app-nothing-to-display />
   } @else {
   <div class="sub-container">
@@ -21,5 +22,5 @@
     </app-tiny-item-component>
     }
   </div>
-  }
+  } }
 </div>

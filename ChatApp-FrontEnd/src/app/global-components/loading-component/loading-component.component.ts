@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Component, input } from '@angular/core';
 
 @Component({
   selector: 'app-loading-component',
@@ -8,4 +7,6 @@ import { Observable } from 'rxjs';
   templateUrl: './loading-component.component.html',
   styleUrl: './loading-component.component.css',
 })
-export class LoadingComponentComponent {}
+export class LoadingComponentComponent {
+  text = input<string>('Loading');
+}

@@ -4,14 +4,18 @@
       placeholder="Search for a contact..."
       formControlName="searchPattern"
     />
-    <button (click)="onSearch()"><i class="bi bi-search"></i></button>
+    <button (click)="onSearch()" [disabled]="getIsActive">
+      <i class="bi bi-search"></i>
+    </button>
     @if(getIsSearched){
     <button (click)="onClearSearch()" class="ml-2">
       <i class="bi bi-x"></i>
     </button>
     }
   </form>
-  @if(getSubmitted && searchPatternForm.get('searchPattern')?.errors){
+  @if(isLoading) {
+  <app-loading-component text="Getting Contancts..." />
+  } @else { @if(getSubmitted && searchPatternForm.get('searchPattern')?.errors){
   <p class="error-text-bright">Search pattern must not be empty!</p>
   }
   <div class="sub-container">
@@ -50,4 +54,5 @@
     <button (click)="setPaginationSelection = item">{{ item }}</button>
     } } }
   </div>
+  }
 </div>

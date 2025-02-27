@@ -1,11 +1,4 @@
-import {
-  ActivatedRouteSnapshot,
-  CanActivate,
-  GuardResult,
-  MaybeAsync,
-  Router,
-  RouterStateSnapshot,
-} from '@angular/router';
+import { CanActivate, Router } from '@angular/router';
 import { catchError, map, Observable, of } from 'rxjs';
 import { AuthenticationService } from './api-calls/authentication.service';
 import { inject, Injectable } from '@angular/core';
@@ -22,7 +15,6 @@ export class AuthGuard implements CanActivate {
   canActivate(): Observable<boolean> {
     return this.authenticationService.checkAuth().pipe(
       map((response: any) => {
-        console.log(response);
         this.userSettingsService.setUserProfile(response.userId, response.user);
         return true;
       }),

@@ -5,6 +5,9 @@
   <p class="pr-2">{{ item.userName }}</p>
   } }
 </div>
+@if(getIsLoading){
+<p>Loading...</p>
+} @else {
 <app-chat-box-component
   [messages]="getMessages"
   [currentUserId]="getCurrentUserId"
@@ -13,3 +16,4 @@
   [form]="textMessageForm"
   (onButtonPress)="postMessage()"
 />
+}

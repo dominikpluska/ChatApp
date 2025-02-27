@@ -9,9 +9,6 @@ using AuthApi.Models;
 using AuthApi.Services;
 using AuthApi.UserAccessor;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 
 namespace AuthApi.Managers.UserManager
 {
@@ -25,7 +22,6 @@ namespace AuthApi.Managers.UserManager
         private readonly IUserAccessor _userAccessor;
         private readonly IMapper _mapper;
         private readonly IUserSettingsService _userSettingsService;
-        //private readonly int _passwordLength = 8;
         private readonly int _pagination = 20;
 
         public UserManager(IUserAccountsRepository userAccountsRepository, IUserAccountsCommands userAccountsCommands, IJwt jwt, ICookieGenerator cookieGenerator,
