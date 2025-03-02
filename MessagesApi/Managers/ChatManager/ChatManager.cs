@@ -97,6 +97,10 @@ namespace MessagesApi.Managers.ChatManager
                 return Results.Problem("Argument Null Exception!", ex.Message);
 
             }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
             catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
@@ -147,6 +151,10 @@ namespace MessagesApi.Managers.ChatManager
             {
                 return Results.Problem("Argument Null Exception!", ex.Message);
 
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -207,70 +215,15 @@ namespace MessagesApi.Managers.ChatManager
                 return Results.Problem("Argument Null Exception!", ex.Message);
 
             }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
             catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
             }
         }
-
-        //public async Task<IResult> GetMessages(string chatId)
-        //{
-        //   try
-        //   {
-        //        ArgumentNullException.ThrowIfNull(chatId);
-        //        var chatIdParsed = ObjectId.Parse(chatId);
-
-        //        var userId = _userAccessor.UserId;
-        //        var userProperties = await _authenticationService.GetAccountProperties(userId);
-
-        //        if (userProperties == null || !userProperties.IsActive)
-        //        {
-        //            return Results.Problem("User does not exist or is inactive!");
-        //        }
-
-        //        var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
-        //        var checkUser = participants.Where(x => x == userId).FirstOrDefault();
-
-        //        if (checkUser == null)
-        //        {
-        //            return Results.Problem("User is not a chat participant!");
-        //        }
-
-        //        var result = await _chatRepository.GetChatMessages(chatIdParsed);
-
-        //        List<MessageRetrivedDto> messageRetrivedDtos = new();
-
-        //        var mappedResults =  _mapper.Map(result, messageRetrivedDtos);
-
-
-        //        IdRequestsDto idRequestsDtos = new()
-        //        {
-        //            Ids = participants
-        //        };
-
-        //        var userList = await _authenticationService.GetUserListByIds(idRequestsDtos);
-
-        //        var mergedList = mappedResults.GroupJoin(userList, result => result.UserId, user => user.UserAccountId, (result, users) =>
-        //        {
-        //            var matchingUser = users.FirstOrDefault();
-        //            result.UserName = matchingUser?.UserName!;
-        //            return result;
-        //        }).ToList();
-
-                
-
-        //        return Results.Ok(new {users = userList, messages = mergedList});
-        //    }
-        //   catch (ArgumentNullException ex)
-        //   {
-        //       return Results.Problem("Argument Null Exception!", ex.Message);
-
-        //   }
-        //   catch (Exception ex)
-        //   {
-        //       return Results.Problem(ex.Message);
-        //   }
-        //}
 
         public async Task<IResult> GetMessage(string chatId, string messageId)
         {
@@ -307,6 +260,10 @@ namespace MessagesApi.Managers.ChatManager
                 return Results.Problem("Argument Null Exception!", ex.Message);
 
             }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
             catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
@@ -340,6 +297,10 @@ namespace MessagesApi.Managers.ChatManager
             {
                 return Results.Problem("Argument Null Exception!", ex.Message);
 
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -392,6 +353,10 @@ namespace MessagesApi.Managers.ChatManager
                 return Results.Problem("Argument Null Exception!", ex.Message);
 
             }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
             catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
@@ -441,6 +406,10 @@ namespace MessagesApi.Managers.ChatManager
             {
                 return Results.Problem("Argument Null Exception!", ex.Message);
 
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
             }
             catch (Exception ex)
             {

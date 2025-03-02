@@ -18,66 +18,36 @@ namespace UserSettingsApi.DatabaseOperations.Commands.BlackListCommands
 
         public async Task<IResult> CreateBlackList(BlackList blackList)
         {
-            try
-            {
-                ArgumentNullException.ThrowIfNull(blackList);
-                await _mongoDbService.BlackListsCollection.InsertOneAsync(blackList);
-                return Results.Ok("Black List has been created");
-            }
-            catch (ArgumentNullException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            ArgumentNullException.ThrowIfNull(blackList);
+            await _mongoDbService.BlackListsCollection.InsertOneAsync(blackList);
+            return Results.Ok("Black List has been created");
         }
 
         public async Task<IResult> AddToBlackList(ObjectId blackListId ,string userId)
         {
-            try
-            {
-                ArgumentNullException.ThrowIfNull(userId);
 
-                var filter = Builders<BlackList>.Filter.Eq(x => x.BlackListId, blackListId);
-                var update = Builders<BlackList>.Update.Push(x => x.BlockedAccounts, userId);
+           ArgumentNullException.ThrowIfNull(userId);
 
-                var result = await _mongoDbService.BlackListsCollection.FindOneAndUpdateAsync(filter, update);
+           var filter = Builders<BlackList>.Filter.Eq(x => x.BlackListId, blackListId);
+           var update = Builders<BlackList>.Update.Push(x => x.BlockedAccounts, userId);
 
-                return Results.Ok(result);
+           var result = await _mongoDbService.BlackListsCollection.FindOneAndUpdateAsync(filter, update);
 
-            }
-            catch (ArgumentNullException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+           return Results.Ok(result);
+
         }
 
         public async Task<IResult> RemoveFromBlackList(ObjectId blackListId, string userId)
         {
-            try
-            {
-                ArgumentNullException.ThrowIfNull(userId);
 
-                var filter = Builders<BsonDocument>.Filter.Eq("_id", blackListId);
-                var delete = Builders<BsonDocument>.Update.Pull("BlockedAccounts", userId);
+            ArgumentNullException.ThrowIfNull(userId);
 
-                var result = await _mongoDbService.BlackListsCollectionBson.UpdateOneAsync(filter, delete);
-                return Results.Ok(result);
-            }
-            catch (ArgumentNullException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            var filter = Builders<BsonDocument>.Filter.Eq("_id", blackListId);
+            var delete = Builders<BsonDocument>.Update.Pull("BlockedAccounts", userId);
+
+            var result = await _mongoDbService.BlackListsCollectionBson.UpdateOneAsync(filter, delete);
+            return Results.Ok(result);
+
         }
     }
 }

@@ -6,6 +6,7 @@ using AuthApi.DataBaseOperations.Repository.UserAccountsRepository;
 using AuthApi.Dto;
 using AuthApi.Helper;
 using AuthApi.Models;
+using AutoMapper;
 
 namespace AuthApi.Managers.AdminManager
 {
@@ -15,14 +16,16 @@ namespace AuthApi.Managers.AdminManager
         private readonly IUserAccountsRepository _userAccountsRepository;
         private readonly IRoleCommands _roleCommands;
         private readonly IRoleRepository _roleRepository;
-        private readonly int _passwordLength = 8;
+        private readonly IMapper _mapper;
 
-        public AdminManager(IUserAccountsCommands userAccountsCommands, IUserAccountsRepository userAccountsRepository, IRoleCommands roleCommands, IRoleRepository roleRepository)
+        public AdminManager(IUserAccountsCommands userAccountsCommands, IUserAccountsRepository userAccountsRepository, IRoleCommands roleCommands, IRoleRepository roleRepository,
+            IMapper mapper)
         {
             _userAccountsCommands = userAccountsCommands;
             _userAccountsRepository = userAccountsRepository;
             _roleCommands = roleCommands;
             _roleRepository = roleRepository;
+            _mapper = mapper;
         }
 
         public async Task<IResult> RegisterNewUser(UserAdminRegistrationDto userDto)
@@ -46,15 +49,6 @@ namespace AuthApi.Managers.AdminManager
                 {
                     return Results.Problem("Username must not contain any white spaces nor any special characters!");
                 }
-
-                if (userDto.Password.Length < _passwordLength)
-                {
-                    return Results.Problem($"Password must contain minimum of {_passwordLength} characters!");
-                }
-                if (!userDto.Password.PasswordChecker())
-                {
-                    return Results.Problem($"Password must contain low, upper character as well as a number and a special character such as ! or *");
-                }
                 if (!userDto.Email.EmailChecker())
                 {
                     return Results.Problem("Email is not valid!");
@@ -72,7 +66,8 @@ namespace AuthApi.Managers.AdminManager
                     ProfilePicturePath = "",
                 };
 
-                await _userAccountsCommands.AddNewUser(userRegistration);
+                var user = _mapper.Map<UserAccount>(userRegistration);
+                await _userAccountsCommands.AddNewUser(user);
 
                 return Results.Ok("User has been added!");
             }
@@ -90,11 +85,6 @@ namespace AuthApi.Managers.AdminManager
                 if (userFromDb == null)
                 {
                     return Results.Problem("UserId doesn't exist!");
-                }
-
-                if (userPasswordChangeDto.Password.Length < _passwordLength)
-                {
-                    return Results.Problem($"Password must contain minimum of {_passwordLength} characters!");
                 }
                 if (!userPasswordChangeDto.Password.PasswordChecker())
                 {

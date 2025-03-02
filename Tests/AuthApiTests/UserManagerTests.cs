@@ -41,6 +41,7 @@ namespace Tests.AuthApiTests
         private readonly Mock<IMapper> _mapper;
         private readonly Mock<IUserSettingsService> _userSettingsService;
 
+        //Next tests : UpdateAccount
 
         public UserManagerTests()
         {
@@ -196,13 +197,24 @@ namespace Tests.AuthApiTests
                 ProfilePicturePath = "",
             };
 
+            _mapper.Setup(x => x.Map<UserAccount>(userRegistration)).Returns(new UserAccount() 
+            {
+                UserName = userRegistration.UserName,
+                Email = userRegistration.Email,
+                PasswordHash = userRegistration.PasswordHash,
+                RoleId = userRegistration.RoleId, 
+                PicturePath = userRegistration.ProfilePicturePath
+            });
+
+            var user = _mapper.Object.Map<UserAccount>(userRegistration);
+
             _userManager.Setup(x => x.RegisterNewUser(userDto)).ReturnsAsync(Results.Ok(""));
-            _userAccountsCommands.Setup(x => x.AddNewUser(userRegistration)).ReturnsAsync("New-Object-Id");
+            _userAccountsCommands.Setup(x => x.AddNewUser(user)).ReturnsAsync("New-Object-Id");
 
 
             //Assert
 
-            var userId = await _userAccountsCommands.Object.AddNewUser(userRegistration);
+            var userId = await _userAccountsCommands.Object.AddNewUser(user);
             var httpResponse = await _userManager.Object.RegisterNewUser(userDto);
 
             var result = Assert.IsType<string>(userId);
@@ -265,6 +277,59 @@ namespace Tests.AuthApiTests
 
             Assert.IsType<ProblemHttpResult>(httpResponse);
         }
+        #endregion
+
+        #region AuthenticationTests
+        [Fact]
+        public async Task CheckAuthentication_GivenNullTokenString_ReturnsUnathorized()
+        {
+            string tokenString = null;
+            string userId = "TestUser";
+
+            var httpResponse = (tokenString != null & userId != null) ? Results.Ok() : Results.Unauthorized();
+            var methodResultSetup = _userManager.Setup(x => x.CheckAuthentication()).ReturnsAsync(httpResponse);
+
+            var methodResullt = await _userManager.Object.CheckAuthentication();
+
+            Assert.IsType<UnauthorizedHttpResult>(methodResullt);
+        }
+
+        [Fact]
+        public async Task CheckAuthentication_GivenNullUserId_ReturnsUnathorized()
+        {
+            string tokenString = "TestUser";
+            string userId = null;
+
+            var httpResponse = (tokenString != null & userId != null) ? Results.Ok() : Results.Unauthorized();
+            var methodResultSetup = _userManager.Setup(x => x.CheckAuthentication()).ReturnsAsync(httpResponse);
+
+            var methodResullt = await _userManager.Object.CheckAuthentication();
+
+            Assert.IsType<UnauthorizedHttpResult>(methodResullt);
+        }
+
+        [Fact]
+        public async Task CheckAuthentication_GivenValidIdAndToken_ReturnsOk()
+        {
+            string tokenString = "TestUser";
+            string userId = "TestUser";
+
+            var httpResponse = (tokenString != null & userId != null) ? Results.Ok() : Results.Unauthorized();
+            var methodResultSetup = _userManager.Setup(x => x.CheckAuthentication()).ReturnsAsync(httpResponse);
+
+            var methodResullt = await _userManager.Object.CheckAuthentication();
+
+            Assert.IsType<Ok>(methodResullt);
+        }
+
+        [Fact]
+        public async Task CheckAuthentication_ThrowsException()
+        {
+            _userManager.Setup(x => x.CheckAuthentication()).ThrowsAsync(new Exception());
+            await Assert.ThrowsAsync<Exception>(() => _userManager.Object.CheckAuthentication());
+        }
+
+
         #endregion
     }
 }

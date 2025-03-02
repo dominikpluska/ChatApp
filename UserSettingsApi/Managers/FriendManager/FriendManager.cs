@@ -69,6 +69,14 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 return Results.Ok(friendList);
             }
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
             catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
@@ -165,7 +173,15 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 return Results.Ok($"Friend request has been sent to {newFriendProperties.UserName}");
             }
-            catch(Exception ex)
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
+            catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
             }
@@ -242,11 +258,15 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 return Results.Ok("Friend Request has been accepted");
             }
-            catch(ArgumentNullException ex)
+            catch (ArgumentNullException ex)
             {
-                return Results.Problem("Argument Null exception!", ex.Message);
+                return Results.Problem("Argument Null Exception!", ex.Message);
             }
-            catch(Exception ex)
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
+            catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
             }
@@ -296,7 +316,11 @@ namespace UserSettingsApi.Managers.FriendsListsManager
             }
             catch (ArgumentNullException ex)
             {
-                return Results.Problem("Argument Null exception!", ex.Message);
+                return Results.Problem("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -354,9 +378,13 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                 return Results.Ok("Friend has been removed!");
 
             }
-            catch(ArgumentNullException ex)
+            catch (ArgumentNullException ex)
             {
-                return Results.Problem("Argument null excetion", ex.Message);
+                return Results.Problem("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -376,6 +404,14 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 await _friendListCommands.CreateFriendList(friendsList);
                 return Results.Ok("Friends has been table created");
+            }
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
             }
             catch (Exception ex)
             {

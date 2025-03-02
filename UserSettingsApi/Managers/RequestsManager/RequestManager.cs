@@ -68,7 +68,15 @@ namespace UserSettingsApi.Managers.RequestsManager
 
                 return Results.Ok(mergedList);
             }
-            catch(Exception ex)
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
+            catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
             }

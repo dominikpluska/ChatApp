@@ -17,65 +17,36 @@ namespace UserSettingsApi.DatabaseOperations.Commands.FriendRequestCommands
 
         public async Task<IResult> InsertRequests(Request request)
         {
-            try
-            {
-                ArgumentNullException.ThrowIfNull(request);
-                await _mongoDBService.RequestsCollection.InsertOneAsync(request);
-                return Results.Ok("Friend request has been sent");
-            }
-            catch (ArgumentNullException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+
+            ArgumentNullException.ThrowIfNull(request);
+            await _mongoDBService.RequestsCollection.InsertOneAsync(request);
+            return Results.Ok("Friend request has been sent");
         }
 
         public async Task<IResult> DeleteRequest(ObjectId requestId)
         {
-            try
-            {
-                ArgumentNullException.ThrowIfNull(requestId);
 
-                var filter = Builders<Request>.Filter.Eq(x => x.RequestId, requestId);
-                await _mongoDBService.RequestsCollection.DeleteOneAsync(filter);
+            ArgumentNullException.ThrowIfNull(requestId);
 
-                return Results.Ok("Friend request has been sent");
-            }
-            catch (ArgumentNullException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            var filter = Builders<Request>.Filter.Eq(x => x.RequestId, requestId);
+            await _mongoDBService.RequestsCollection.DeleteOneAsync(filter);
+
+            return Results.Ok("Friend request has been sent");
+
         }
 
         public async Task<IResult> AcceptRequest(ObjectId requestId)
         {
-            try
-            {
-                ArgumentNullException.ThrowIfNull(requestId);
 
-                var filter = Builders<Request>.Filter.Eq(x => x.RequestId, requestId);
-                var update = Builders<Request>.Update.Set(x => x.IsAccepted, true);
+           ArgumentNullException.ThrowIfNull(requestId);
 
-                await _mongoDBService.RequestsCollection.UpdateOneAsync(filter, update);
+           var filter = Builders<Request>.Filter.Eq(x => x.RequestId, requestId);
+           var update = Builders<Request>.Update.Set(x => x.IsAccepted, true);
 
-                return Results.Ok("Chat updated!");
+           await _mongoDBService.RequestsCollection.UpdateOneAsync(filter, update);
 
-            }
-            catch (ArgumentNullException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+           return Results.Ok("Chat updated!");
+
         }
     }
 }

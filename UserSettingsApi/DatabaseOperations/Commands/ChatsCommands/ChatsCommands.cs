@@ -14,20 +14,11 @@ namespace UserSettingsApi.DatabaseOperations.Commands.ChatsCommands
 
         public async Task<IResult> CreateChatsTable(Chat chat)
         {
-            try
-            {
-                ArgumentNullException.ThrowIfNull(chat);
-                await _mongoDbService.ChatsCollection.InsertOneAsync(chat);
-                return Results.Ok("Chat has been created");
-            }
-            catch (ArgumentNullException ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+
+           ArgumentNullException.ThrowIfNull(chat);
+           await _mongoDbService.ChatsCollection.InsertOneAsync(chat);
+           return Results.Ok("Chat has been created");
+
         }
     }
 }

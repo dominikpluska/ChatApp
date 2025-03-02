@@ -26,7 +26,15 @@ namespace UserSettingsApi.Managers.ChatsManager
                 var chats = await _chatsRepository.GetChatList(userId);
                 return Results.Ok(chats.ChatList);
             }
-            catch(Exception ex)
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
+            catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
             }
@@ -43,6 +51,14 @@ namespace UserSettingsApi.Managers.ChatsManager
 
                 await _chatsCommands.CreateChatsTable(chat);
                 return Results.Ok("Chats table created");
+            }
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
             }
             catch (Exception ex)
             {

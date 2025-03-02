@@ -83,7 +83,10 @@ namespace AuthApi.Managers.UserManager
                     ProfilePicturePath = "",
                 };
 
-                var userAccountId = await _userAccountsCommands.AddNewUser(userRegistration);
+
+                var user = _mapper.Map<UserAccount>(userRegistration);
+
+                var userAccountId = await _userAccountsCommands.AddNewUser(user);
 
                 //If any error occurs in the line below, drop username from db
 
@@ -195,6 +198,10 @@ namespace AuthApi.Managers.UserManager
 
                 return Results.Ok("Account has been updated!");
             }
+            catch(ArgumentNullException ex)
+            {
+                return Results.Problem(ex.Message);
+            }
             catch (Exception ex) 
             {
                 return Results.Problem(ex.Message);
@@ -206,8 +213,8 @@ namespace AuthApi.Managers.UserManager
             try
             {
                 var token = _userAccessor.TokenString;
-                var userName = _userAccessor.UserName;
                 var userId =_userAccessor.UserId;
+
                 var user = await _userAccountsRepository.GetUser(userId);
 
                 if (token != null && user != null)

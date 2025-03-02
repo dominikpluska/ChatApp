@@ -137,6 +137,10 @@ namespace UserSettingsApi.Managers.BlackListsManager
             {
                 return Results.Problem("Argument Null Exception!", ex.Message);
             }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
             catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
@@ -147,18 +151,6 @@ namespace UserSettingsApi.Managers.BlackListsManager
         {
             try
             {
-                //var userId = _userAccessor.UserId;
-                //var userProperties = await _authenticationService.GetAccountProperties(userId);
-
-                //if (userProperties == null)
-                //{
-                //    return Results.Problem("User does not exist!");
-                //}
-
-                //if (!userProperties.IsActive)
-                //{
-                //    return Results.Problem("User is inactive!");
-                //}
 
                 var blackListId = await _blackListRepository.GetBlackListId(chatterId);
 
@@ -174,6 +166,10 @@ namespace UserSettingsApi.Managers.BlackListsManager
             catch (ArgumentNullException ex)
             {
                 return Results.Problem("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -225,6 +221,10 @@ namespace UserSettingsApi.Managers.BlackListsManager
             {
                 return Results.Problem("Argument Null Exception!", ex.Message);
             }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
             catch (Exception ex)
             {
                 return Results.Problem(ex.Message);
@@ -259,7 +259,14 @@ namespace UserSettingsApi.Managers.BlackListsManager
 
                 return Results.Ok(blockedList);
             }
-
+            catch (ArgumentNullException ex)
+            {
+                return Results.Problem("Argument Null Exception!", ex.Message);
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new OperationCanceledException($"Operation Canceled Exception! {ex.Message}");
+            }
             catch (Exception ex)
             {
                 return Results.Problem(ex.Message);

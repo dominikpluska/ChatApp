@@ -24,7 +24,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
-        builder.WithOrigins("http://localhost:4200", "https://localhost:7500", "http://192.168.0.228:4200")
+        builder.WithOrigins("http://localhost:4200", "https://localhost:7500")
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials();
@@ -81,7 +81,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpClient();
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetValue<string>("ConnectionStrings:DefaultConnection"));
 });
