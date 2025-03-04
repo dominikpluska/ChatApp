@@ -2,6 +2,6 @@
 {
     public interface IRequestManager
     {
-        public  Task<IResult> GetAllRequests();
+        public  Task<IResult> GetAllRequests(CancellationToken cancellationToken);
     }
 }

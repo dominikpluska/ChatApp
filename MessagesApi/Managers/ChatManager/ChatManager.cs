@@ -36,7 +36,7 @@ namespace MessagesApi.Managers.ChatManager
 
         //Currently working on
         //TODO Insert it to the chats list
-        public async Task<IResult> OpenChat(string chatterId)
+        public async Task<IResult> OpenChat(string chatterId, CancellationToken cancellationToken)
         {
             try
             {
@@ -69,7 +69,7 @@ namespace MessagesApi.Managers.ChatManager
                     return Results.Problem("User does not exist or is inactive!");
                 }
 
-                var checkIfChatExists = await _chatRepository.FindChat(userProperties.UserAccountId, chatterProperties.UserAccountId);
+                var checkIfChatExists = await _chatRepository.FindChat(userProperties.UserAccountId, chatterProperties.UserAccountId, cancellationToken);
 
                 if(checkIfChatExists != null)
                 {
@@ -85,7 +85,7 @@ namespace MessagesApi.Managers.ChatManager
                     }
                 };
 
-                var chatId = await _chatCommands.CreateChat(chat);
+                var chatId = await _chatCommands.CreateChat(chat, cancellationToken);
 
                 //Insert it to the chats list
 
@@ -107,7 +107,7 @@ namespace MessagesApi.Managers.ChatManager
             }
         }
 
-        public async Task<IResult> PostMessage(MessageDto messageDto)
+        public async Task<IResult> PostMessage(MessageDto messageDto, CancellationToken cancellationToken)
         {
             try
             {
@@ -121,7 +121,7 @@ namespace MessagesApi.Managers.ChatManager
                     return Results.Problem("User is disabled or incative!");
                 }
                 var chatId = ObjectId.Parse(messageDto.ChatId);
-                var chatParticipants = await _chatRepository.GetChatParticipants(chatId);
+                var chatParticipants = await _chatRepository.GetChatParticipants(chatId, cancellationToken);
 
                 var getChatParticipant = chatParticipants.Where(x => x == userId).FirstOrDefault();
                 if (getChatParticipant == null)
@@ -135,7 +135,7 @@ namespace MessagesApi.Managers.ChatManager
                     TextMessage = messageDto.TextMessage,
                 };
 
-                await _chatCommands.InsertNewMessage(chatId, message);
+                await _chatCommands.InsertNewMessage(chatId, message, cancellationToken);
 
                 MessageRetrivedDto messageRetrivedDto = new() ;
 
@@ -162,7 +162,7 @@ namespace MessagesApi.Managers.ChatManager
             }
         }
 
-        public async Task<IResult> GetMessages(string chatId)
+        public async Task<IResult> GetMessages(string chatId, CancellationToken cancellationToken)
         {
             try
             {
@@ -177,7 +177,7 @@ namespace MessagesApi.Managers.ChatManager
                     return Results.Problem("User is disabled or incative!");
                 }
 
-                var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
+                var participants = await _chatRepository.GetChatParticipants(chatIdParsed,cancellationToken);
                 var checkUser = participants.Where(x => x == userId).FirstOrDefault();
 
                 if (checkUser == null)
@@ -185,7 +185,7 @@ namespace MessagesApi.Managers.ChatManager
                     return Results.Problem("User is not a chat participant!");
                 }
 
-                var result = await _chatRepository.GetChatMessages(chatIdParsed);
+                var result = await _chatRepository.GetChatMessages(chatIdParsed, cancellationToken);
 
 
                 List<MessageRetrivedDto> messageRetrivedDtos = new();
@@ -225,7 +225,7 @@ namespace MessagesApi.Managers.ChatManager
             }
         }
 
-        public async Task<IResult> GetMessage(string chatId, string messageId)
+        public async Task<IResult> GetMessage(string chatId, string messageId, CancellationToken cancellationToken)
         {
             try
             {
@@ -243,7 +243,7 @@ namespace MessagesApi.Managers.ChatManager
                     return Results.Problem("User does not exist or is inactive!");
                 }
 
-                var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
+                var participants = await _chatRepository.GetChatParticipants(chatIdParsed, cancellationToken);
                 var checkUser = participants.Where(x => x == userId).FirstOrDefault();
 
                 if (checkUser == null)
@@ -251,7 +251,7 @@ namespace MessagesApi.Managers.ChatManager
                     return Results.Problem("User is not a chat participant!");
                 }
 
-                var message = await _chatRepository.GetChatMessage(chatIdParsed, messageIdParsed);
+                var message = await _chatRepository.GetChatMessage(chatIdParsed, messageIdParsed, cancellationToken);
 
                 return Results.Ok(message);
             }
@@ -270,7 +270,7 @@ namespace MessagesApi.Managers.ChatManager
             }
         }
 
-        public async Task<IResult> UpdateChatMessage(MessageUpdateDto messageUpdateDto)
+        public async Task<IResult> UpdateChatMessage(MessageUpdateDto messageUpdateDto, CancellationToken cancellationToken)
         {
             try
             {
@@ -282,7 +282,7 @@ namespace MessagesApi.Managers.ChatManager
                     return Results.Problem("User does not exist or is inactive!");
                 }
 
-                var participants = await _chatRepository.GetChatParticipants(ObjectId.Parse(messageUpdateDto.ChatId));
+                var participants = await _chatRepository.GetChatParticipants(ObjectId.Parse(messageUpdateDto.ChatId), cancellationToken);
                 var checkUser = participants.Where(x => x == userId).FirstOrDefault();
 
                 if (checkUser == null)
@@ -290,7 +290,7 @@ namespace MessagesApi.Managers.ChatManager
                     return Results.Problem("User is not a chat participant!");
                 }
 
-                await _chatCommands.UpdateMessage(messageUpdateDto);
+                await _chatCommands.UpdateMessage(messageUpdateDto, cancellationToken);
                 return Results.Ok("Updated!");
             }
             catch (ArgumentNullException ex)
@@ -310,7 +310,7 @@ namespace MessagesApi.Managers.ChatManager
 
         //Check if message exists before
         //Check if user is allowed to delete their own message
-        public async Task<IResult> DeleteChatMessage(string chatId, string messageId)
+        public async Task<IResult> DeleteChatMessage(string chatId, string messageId, CancellationToken cancellationToken)
         {
             try
             {
@@ -329,7 +329,7 @@ namespace MessagesApi.Managers.ChatManager
                 var chatIdParsed = ObjectId.Parse(chatId);
                 var messageIdParsed = ObjectId.Parse(messageId);
 
-                var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
+                var participants = await _chatRepository.GetChatParticipants(chatIdParsed, cancellationToken);
                 var checkUser = participants.Where(x => x == userId).FirstOrDefault();
 
                 if (checkUser == null)
@@ -337,14 +337,14 @@ namespace MessagesApi.Managers.ChatManager
                     return Results.Problem("User is not a chat participant!");
                 }
 
-                var message = await _chatRepository.GetChatMessage(chatIdParsed ,messageIdParsed);
+                var message = await _chatRepository.GetChatMessage(chatIdParsed ,messageIdParsed, cancellationToken);
 
                 if(message == null)
                 {
                     return Results.Problem("Chat message does not exist!");
                 }
 
-                await _chatCommands.DeleteMessage(chatIdParsed, messageIdParsed);
+                await _chatCommands.DeleteMessage(chatIdParsed, messageIdParsed, cancellationToken);
 
                 return Results.Ok("Message deleted");
             }
@@ -363,7 +363,7 @@ namespace MessagesApi.Managers.ChatManager
             }
         }
 
-        public async Task<IResult> LeaveChat(string chatId)
+        public async Task<IResult> LeaveChat(string chatId, CancellationToken cancellationToken)
         {
             try
             {
@@ -380,7 +380,7 @@ namespace MessagesApi.Managers.ChatManager
 
                 var chatIdParsed = ObjectId.Parse(chatId);
 
-                var participants = await _chatRepository.GetChatParticipants(chatIdParsed);
+                var participants = await _chatRepository.GetChatParticipants(chatIdParsed, cancellationToken);
                 var checkUser = participants.Where(x => x == userId).FirstOrDefault();
 
                 if (checkUser == null)
@@ -392,11 +392,11 @@ namespace MessagesApi.Managers.ChatManager
 
                 if(participants.Count() == 1)
                 {
-                    await _chatCommands.DropChat(chatIdParsed);
+                    await _chatCommands.DropChat(chatIdParsed, cancellationToken);
                 }
                 else
                 {
-                    await _chatCommands.RemoveChatParticipant(chatIdParsed, userId);
+                    await _chatCommands.RemoveChatParticipant(chatIdParsed, userId, cancellationToken);
                 }
             
                 return Results.Ok("Chat left!");

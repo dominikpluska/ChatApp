@@ -40,6 +40,7 @@ namespace Tests.AuthApiTests
         private readonly Mock<IUserAccessor> _userAccessor;
         private readonly Mock<IMapper> _mapper;
         private readonly Mock<IUserSettingsService> _userSettingsService;
+        private readonly CancellationToken cancellationToken;
 
         //Next tests : UpdateAccount
 
@@ -62,11 +63,11 @@ namespace Tests.AuthApiTests
         {
             //Arrange
             var ex = new ArgumentNullException();
-            _userManager.Setup(x => x.RegisterNewUser(null)).ReturnsAsync(Results.Problem("Argument Null Exception!", 
+            _userManager.Setup(x => x.RegisterNewUser(null, cancellationToken)).ReturnsAsync(Results.Problem("Argument Null Exception!", 
                 ex.Message));
 
             //Assert
-            var result = await _userManager.Object.RegisterNewUser(null);
+            var result = await _userManager.Object.RegisterNewUser(null, cancellationToken);
 
             //Act
 
@@ -89,15 +90,15 @@ namespace Tests.AuthApiTests
                 RoleId = "AAAA-AAAA-AAAA-AAAA",
             };
 
-            _userAccountsRepository.Setup(x => x.GetUserByName(userDto.UserName)).ReturnsAsync(userAccount);
+            _userAccountsRepository.Setup(x => x.GetUserByName(userDto.UserName, cancellationToken)).ReturnsAsync(userAccount);
             
 
             //Assert
-            var doesUserExist = await _userAccountsRepository.Object.GetUserByName(userDto.UserName);
+            var doesUserExist = await _userAccountsRepository.Object.GetUserByName(userDto.UserName, cancellationToken);
             var httpResult = doesUserExist != null ? Results.Problem("Username already exists! Choose a different user name!") : null;
-            _userManager.Setup(x => x.RegisterNewUser(userDto)).ReturnsAsync(httpResult!);
+            _userManager.Setup(x => x.RegisterNewUser(userDto, cancellationToken)).ReturnsAsync(httpResult!);
 
-            var result = await _userManager.Object.RegisterNewUser(userDto);
+            var result = await _userManager.Object.RegisterNewUser(userDto, cancellationToken);
 
             //Act
 
@@ -118,14 +119,14 @@ namespace Tests.AuthApiTests
                 RoleId = "AAAA-AAAA-AAAA-AAAA",
             };
 
-            _userAccountsRepository.Setup(x => x.GetUserByEmail(userDto.Email)).ReturnsAsync(userAccount);
+            _userAccountsRepository.Setup(x => x.GetUserByEmail(userDto.Email, cancellationToken)).ReturnsAsync(userAccount);
 
             //Assert
-            var doesUserExist = await _userAccountsRepository.Object.GetUserByEmail(userDto.Email);
+            var doesUserExist = await _userAccountsRepository.Object.GetUserByEmail(userDto.Email, cancellationToken);
             var httpResult = doesUserExist != null ? Results.Problem("An account to which provided email is bound already exists! Please choose a different one or contact support for more details!") : null;
-            _userManager.Setup(x => x.RegisterNewUser(userDto)).ReturnsAsync(httpResult!);
+            _userManager.Setup(x => x.RegisterNewUser(userDto, cancellationToken)).ReturnsAsync(httpResult!);
 
-            var result = await _userManager.Object.RegisterNewUser(userDto);
+            var result = await _userManager.Object.RegisterNewUser(userDto, cancellationToken);
 
             //Act
 
@@ -142,8 +143,8 @@ namespace Tests.AuthApiTests
             var expectedResult = result ? Results.Ok("") : Results.Problem("");
 
             //Assert
-            _userManager.Setup(x => x.RegisterNewUser(userDto)).ReturnsAsync(expectedResult);
-            var httpResult = await _userManager.Object.RegisterNewUser(userDto);
+            _userManager.Setup(x => x.RegisterNewUser(userDto, cancellationToken)).ReturnsAsync(expectedResult);
+            var httpResult = await _userManager.Object.RegisterNewUser(userDto, cancellationToken);
 
             //Act 
             Assert.True(httpResult == expectedResult);
@@ -159,8 +160,8 @@ namespace Tests.AuthApiTests
             var expectedResult = result ? Results.Ok("") : Results.Problem("");
 
             //Assert
-            _userManager.Setup(x => x.RegisterNewUser(userDto)).ReturnsAsync(expectedResult);
-            var httpResult = await _userManager.Object.RegisterNewUser(userDto);
+            _userManager.Setup(x => x.RegisterNewUser(userDto, cancellationToken)).ReturnsAsync(expectedResult);
+            var httpResult = await _userManager.Object.RegisterNewUser(userDto, cancellationToken);
 
             //Act 
             Assert.True(httpResult == expectedResult);
@@ -176,8 +177,8 @@ namespace Tests.AuthApiTests
             var expectedResult = result ? Results.Ok("") : Results.Problem("");
 
             //Assert
-            _userManager.Setup(x => x.RegisterNewUser(userDto)).ReturnsAsync(expectedResult);
-            var httpResult = await _userManager.Object.RegisterNewUser(userDto);
+            _userManager.Setup(x => x.RegisterNewUser(userDto, cancellationToken)).ReturnsAsync(expectedResult);
+            var httpResult = await _userManager.Object.RegisterNewUser(userDto, cancellationToken);
 
             //Act 
             Assert.True(httpResult == expectedResult);
@@ -208,14 +209,14 @@ namespace Tests.AuthApiTests
 
             var user = _mapper.Object.Map<UserAccount>(userRegistration);
 
-            _userManager.Setup(x => x.RegisterNewUser(userDto)).ReturnsAsync(Results.Ok(""));
+            _userManager.Setup(x => x.RegisterNewUser(userDto, cancellationToken)).ReturnsAsync(Results.Ok(""));
             _userAccountsCommands.Setup(x => x.AddNewUser(user)).ReturnsAsync("New-Object-Id");
 
 
             //Assert
 
             var userId = await _userAccountsCommands.Object.AddNewUser(user);
-            var httpResponse = await _userManager.Object.RegisterNewUser(userDto);
+            var httpResponse = await _userManager.Object.RegisterNewUser(userDto, cancellationToken);
 
             var result = Assert.IsType<string>(userId);
             var httpResult = Assert.IsType<Ok<string>>(httpResponse);
@@ -239,9 +240,9 @@ namespace Tests.AuthApiTests
 
             var wasPasswordCorrect = userLoginCorrectCredentials.Password == userLoginDto.Password;
 
-            _userManager.Setup(x => x.Login(userLoginDto)).ReturnsAsync(Results.Ok(""));
+            _userManager.Setup(x => x.Login(userLoginDto, cancellationToken)).ReturnsAsync(Results.Ok(""));
 
-            var httpResponse = wasPasswordCorrect ? await _userManager.Object.Login(userLoginDto) : Results.Problem("");
+            var httpResponse = wasPasswordCorrect ? await _userManager.Object.Login(userLoginDto, cancellationToken) : Results.Problem("");
 
             Assert.IsType<Ok<string>>(httpResponse);
         }
@@ -257,9 +258,9 @@ namespace Tests.AuthApiTests
 
             var wasPasswordCorrect = userLoginCorrectCredentials.Password == userLoginDto.Password;
 
-            _userManager.Setup(x => x.Login(userLoginDto)).ReturnsAsync(Results.Ok(""));
+            _userManager.Setup(x => x.Login(userLoginDto, cancellationToken)).ReturnsAsync(Results.Ok(""));
 
-            var httpResponse = wasPasswordCorrect ? await _userManager.Object.Login(userLoginDto) : Results.Problem("");
+            var httpResponse = wasPasswordCorrect ? await _userManager.Object.Login(userLoginDto, cancellationToken) : Results.Problem("");
 
             Assert.IsType<ProblemHttpResult>(httpResponse);
         }
@@ -270,9 +271,9 @@ namespace Tests.AuthApiTests
         {
             var isException = userLoginDto.Password == null && userLoginDto.UserName == null
                 ? new ArgumentNullException() : null;
-            _userManager.Setup(x => x.Login(userLoginDto)).ReturnsAsync(Results.Problem(""));
+            _userManager.Setup(x => x.Login(userLoginDto, cancellationToken)).ReturnsAsync(Results.Problem(""));
 
-            var httpResponse = isException != null ? await _userManager.Object.Login(userLoginDto) :
+            var httpResponse = isException != null ? await _userManager.Object.Login(userLoginDto, cancellationToken) :
                                 null;
 
             Assert.IsType<ProblemHttpResult>(httpResponse);
@@ -287,9 +288,9 @@ namespace Tests.AuthApiTests
             string userId = "TestUser";
 
             var httpResponse = (tokenString != null & userId != null) ? Results.Ok() : Results.Unauthorized();
-            var methodResultSetup = _userManager.Setup(x => x.CheckAuthentication()).ReturnsAsync(httpResponse);
+            var methodResultSetup = _userManager.Setup(x => x.CheckAuthentication(cancellationToken)).ReturnsAsync(httpResponse);
 
-            var methodResullt = await _userManager.Object.CheckAuthentication();
+            var methodResullt = await _userManager.Object.CheckAuthentication(cancellationToken);
 
             Assert.IsType<UnauthorizedHttpResult>(methodResullt);
         }
@@ -301,9 +302,9 @@ namespace Tests.AuthApiTests
             string userId = null;
 
             var httpResponse = (tokenString != null & userId != null) ? Results.Ok() : Results.Unauthorized();
-            var methodResultSetup = _userManager.Setup(x => x.CheckAuthentication()).ReturnsAsync(httpResponse);
+            var methodResultSetup = _userManager.Setup(x => x.CheckAuthentication(cancellationToken)).ReturnsAsync(httpResponse);
 
-            var methodResullt = await _userManager.Object.CheckAuthentication();
+            var methodResullt = await _userManager.Object.CheckAuthentication(cancellationToken);
 
             Assert.IsType<UnauthorizedHttpResult>(methodResullt);
         }
@@ -315,9 +316,9 @@ namespace Tests.AuthApiTests
             string userId = "TestUser";
 
             var httpResponse = (tokenString != null & userId != null) ? Results.Ok() : Results.Unauthorized();
-            var methodResultSetup = _userManager.Setup(x => x.CheckAuthentication()).ReturnsAsync(httpResponse);
+            var methodResultSetup = _userManager.Setup(x => x.CheckAuthentication(cancellationToken)).ReturnsAsync(httpResponse);
 
-            var methodResullt = await _userManager.Object.CheckAuthentication();
+            var methodResullt = await _userManager.Object.CheckAuthentication(cancellationToken);
 
             Assert.IsType<Ok>(methodResullt);
         }
@@ -325,8 +326,8 @@ namespace Tests.AuthApiTests
         [Fact]
         public async Task CheckAuthentication_ThrowsException()
         {
-            _userManager.Setup(x => x.CheckAuthentication()).ThrowsAsync(new Exception());
-            await Assert.ThrowsAsync<Exception>(() => _userManager.Object.CheckAuthentication());
+            _userManager.Setup(x => x.CheckAuthentication(cancellationToken)).ThrowsAsync(new Exception());
+            await Assert.ThrowsAsync<Exception>(() => _userManager.Object.CheckAuthentication(cancellationToken));
         }
 
 

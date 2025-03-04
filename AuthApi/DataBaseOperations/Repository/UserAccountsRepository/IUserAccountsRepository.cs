@@ -5,14 +5,14 @@ namespace AuthApi.DataBaseOperations.Repository.UserAccountsRepository
 {
     public interface IUserAccountsRepository
     {
-        public Task<IEnumerable<UserAccountDto>> GetAllUsers();
-        public Task<UserAccount> GetUser(string userId);
-        public Task<UserAccount> GetUserByName(string userName);
-        public Task<UserAccount> GetUserByEmail(string email);
-        public Task<IEnumerable<UserAccountDto>> GetAllActiveUsers();
-        public Task<int> GetActiveUsersCount();
-        public Task<IEnumerable<UserAccount>> GetTopActiveUsersOrderedAlphabetically(int itemsToSkip);
-        public Task<IEnumerable<UserAccount>> Search(string userName);
-        public Task<IEnumerable<UserAccount>> SelectUsersFromIdList(IEnumerable<string> listOfIds);
+        public Task<IEnumerable<UserAccountDto>> GetAllUsers(CancellationToken cacncellationToken);
+        public Task<UserAccount> GetUser(string userId, CancellationToken cacncellationToken);
+        public Task<UserAccount> GetUserByName(string userName, CancellationToken cacncellationToken);
+        public Task<UserAccount> GetUserByEmail(string email, CancellationToken cacncellationToken);
+        public Task<IEnumerable<UserAccountDto>> GetAllActiveUsers(CancellationToken cacncellationToken);
+        public Task<int> GetActiveUsersCount(CancellationToken cacncellationToken);
+        public Task<IEnumerable<UserAccount>> GetTopActiveUsersOrderedAlphabetically(int itemsToSkip, CancellationToken cacncellationToken);
+        public Task<IEnumerable<UserAccount>> Search(string userName, CancellationToken cacncellationToken);
+        public Task<IEnumerable<UserAccount>> SelectUsersFromIdList(IEnumerable<string> listOfIds, CancellationToken cacncellationToken);
     }
 }

@@ -8,13 +8,13 @@ namespace MessagesApi
     {
         public static WebApplication MapMessagesEndpoints(this WebApplication app, IChatManager chatManager)
         {
-            app.MapPost("/PostMessage", async (MessageDto messageDto) => await chatManager.PostMessage(messageDto));
-            app.MapPut("/UpdateMessage", async (MessageUpdateDto messageUpdateDto) => await chatManager.UpdateChatMessage(messageUpdateDto));
-            app.MapGet("GetChatMessages/{chatId}", async (string chatId) => await chatManager.GetMessages(chatId));
-            app.MapGet("/GetChatMessage/c={chatId}/m={messageId}", async (string chatId, string messageId) => await chatManager.GetMessage(chatId, messageId));
-            app.MapGet("/OpenChat/{chatterId}", async (string chatterId) => await chatManager.OpenChat(chatterId));
-            app.MapDelete("/DeleteChatMessage/c={chatId}/m={messageId}", async (string chatId, string messageId) => await chatManager.DeleteChatMessage(chatId, messageId));
-            app.MapDelete("/LeaveChat/{chatId}", async (string chatId) => await chatManager.LeaveChat(chatId));
+            app.MapPost("/PostMessage", async (MessageDto messageDto, CancellationToken cancellationToken) => await chatManager.PostMessage(messageDto, cancellationToken));
+            app.MapPut("/UpdateMessage", async (MessageUpdateDto messageUpdateDto, CancellationToken cancellationToken) => await chatManager.UpdateChatMessage(messageUpdateDto, cancellationToken));
+            app.MapGet("GetChatMessages/{chatId}", async (string chatId, CancellationToken cancellationToken) => await chatManager.GetMessages(chatId, cancellationToken));
+            app.MapGet("/GetChatMessage/c={chatId}/m={messageId}", async (string chatId, string messageId, CancellationToken cancellationToken) => await chatManager.GetMessage(chatId, messageId, cancellationToken));
+            app.MapGet("/OpenChat/{chatterId}", async (string chatterId, CancellationToken cancellationToken) => await chatManager.OpenChat(chatterId, cancellationToken));
+            app.MapDelete("/DeleteChatMessage/c={chatId}/m={messageId}", async (string chatId, string messageId, CancellationToken cancellationToken) => await chatManager.DeleteChatMessage(chatId, messageId, cancellationToken));
+            app.MapDelete("/LeaveChat/{chatId}", async (string chatId, CancellationToken cancellationToken) => await chatManager.LeaveChat(chatId, cancellationToken));
             return app;
         }
 

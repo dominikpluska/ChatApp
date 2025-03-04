@@ -5,8 +5,8 @@ namespace UserSettingsApi.DatabaseOperations.Commands.FriendsLisiCommands
 {
     public interface IFriendListCommands
     {
-        public Task<IResult> CreateFriendList(FriendsList friendsList);
-        public Task<IResult> AddNewFriend(ObjectId friendsListId, string friendId);
-        public Task<IResult> RemoveFriend(ObjectId friendsListId, string friendId);
+        public Task<IResult> CreateFriendList(FriendsList friendsList, CancellationToken cancellationToken);
+        public Task<IResult> AddNewFriend(ObjectId friendsListId, string friendId, CancellationToken cancellationToken);
+        public Task<IResult> RemoveFriend(ObjectId friendsListId, string friendId, CancellationToken cancellationToken);
     }
 }

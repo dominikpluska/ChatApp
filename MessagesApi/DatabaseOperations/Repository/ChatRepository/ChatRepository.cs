@@ -10,6 +10,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System;
 using System.Text.Json;
+using System.Threading;
 
 namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
 {
@@ -23,7 +24,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
             _mongoDBService = mongoDBService;
         }
 
-        public async Task<ObjectId> CheckChat(ObjectId chatId)
+        public async Task<ObjectId> CheckChat(ObjectId chatId, CancellationToken cancellationToken)
         {
 
             var filter = Builders<Chat>.Filter.Eq(x => x.ChatId, chatId);
@@ -32,7 +33,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
                 .Exclude(x => x.Messages)
                 .Exclude(x => x.ChatParticipants);
 
-            var result = await _mongoDBService.ChatCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
+            var result = await _mongoDBService.ChatCollection.Find(filter).Project(projection).FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             var selectedId = result.GetValue("_id");
             var deserializedResult = BsonSerializer.Deserialize<ObjectId>(selectedId.ToJson());
@@ -41,7 +42,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
 
         }
 
-        public async Task<string> FindChat(string userId, string chatterId)
+        public async Task<string> FindChat(string userId, string chatterId, CancellationToken cancellationToken)
         {
 
             ArgumentNullException.ThrowIfNull(userId, chatterId);
@@ -51,7 +52,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
                 .Exclude(x => x.ChatParticipants)
                 .Exclude(x => x.Messages);
 
-            var document = await _mongoDBService.ChatCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
+            var document = await _mongoDBService.ChatCollection.Find(filter).Project(projection).FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if(document == null)
             {
@@ -65,7 +66,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
 
         }
 
-        public async Task<IEnumerable<string>> GetChatParticipants(ObjectId chatId)
+        public async Task<IEnumerable<string>> GetChatParticipants(ObjectId chatId, CancellationToken cancellationToken)
         {
 
             var filter = Builders<Chat>.Filter.Eq(x => x.ChatId, chatId);
@@ -74,7 +75,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
                 .Exclude(x => x.ChatId);
 
 
-            var results = await _mongoDBService.ChatCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
+            var results = await _mongoDBService.ChatCollection.Find(filter).Project(projection).FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             var chatParticipantsBson = results.GetValue("ChatParticipants");
             var deserializedResults = BsonSerializer.Deserialize<IEnumerable<string>>(chatParticipantsBson.ToJson());
@@ -84,7 +85,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
         } 
 
         //Limit about of messages in the future updates and work on the frontend to implement that feature
-        public async Task<IEnumerable<Message>> GetChatMessages(ObjectId chatId)
+        public async Task<IEnumerable<Message>> GetChatMessages(ObjectId chatId, CancellationToken cancellationToken)
         {
 
             var pipeline = new[]
@@ -100,7 +101,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
                 })
             };
 
-            var results = await _mongoDBService.ChatCollectionBson.Aggregate<BsonDocument>(pipeline).ToListAsync();
+            var results = await _mongoDBService.ChatCollectionBson.Aggregate<BsonDocument>(pipeline).ToListAsync(cancellationToken: cancellationToken);
 
             var deserializedResults = results
                 .Select(result => BsonSerializer.Deserialize<Message>(result["Messages"].AsBsonDocument)) 
@@ -109,7 +110,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
             return deserializedResults!;
         }
 
-        public async Task<Message> GetChatMessage(ObjectId chatId, ObjectId messageId)
+        public async Task<Message> GetChatMessage(ObjectId chatId, ObjectId messageId, CancellationToken cancellationToken)
         {
 
            var filter = Builders<BsonDocument>.Filter.Eq("_id", chatId);
@@ -118,7 +119,7 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
            var projection = Builders<BsonDocument>.Projection
                            .ElemMatch<BsonDocument>("Messages", Builders<BsonDocument>.Filter.Eq("Messages._id", messageId));
 
-           var results = await _mongoDBService.ChatCollectionBson.Find(filter).FirstOrDefaultAsync();
+           var results = await _mongoDBService.ChatCollectionBson.Find(filter).FirstOrDefaultAsync(cancellationToken: cancellationToken);
            var messagesBson = results.GetValue("Messages").AsBsonArray;
 
            var deserializedResults = messagesBson.Select(x => BsonSerializer.Deserialize<Message>(x.AsBsonDocument)).FirstOrDefault();

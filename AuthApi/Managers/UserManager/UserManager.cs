@@ -37,19 +37,19 @@ namespace AuthApi.Managers.UserManager
             _userSettingsService = userSettingsService;
         }
 
-        public async Task<IResult> RegisterNewUser(UserRegistrationDto userDto)
+        public async Task<IResult> RegisterNewUser(UserRegistrationDto userDto, CancellationToken cancellationToken)
         {
             try
             {
                 ArgumentNullException.ThrowIfNull(userDto);
 
-                var checkIfUserNameExists = await _userAccountsRepository.GetUserByName(userDto.UserName);
+                var checkIfUserNameExists = await _userAccountsRepository.GetUserByName(userDto.UserName, cancellationToken);
                 if (checkIfUserNameExists != null)
                 {
                     return Results.Problem("Username already exists! Choose a different user name!");
                 }
 
-                var checkIfEmailExists = await _userAccountsRepository.GetUserByEmail(userDto.Email);
+                var checkIfEmailExists = await _userAccountsRepository.GetUserByEmail(userDto.Email, cancellationToken);
 
                 if (checkIfEmailExists != null)
                 {
@@ -105,12 +105,12 @@ namespace AuthApi.Managers.UserManager
 
         }
 
-        public async Task<IResult> Login(UserLoginDto userLoginDto)
+        public async Task<IResult> Login(UserLoginDto userLoginDto, CancellationToken cancellationToken)
         {
             try
             {
                 ArgumentNullException.ThrowIfNull(userLoginDto);
-                var userFromDb = await _userAccountsRepository.GetUserByName(userLoginDto.UserName);
+                var userFromDb = await _userAccountsRepository.GetUserByName(userLoginDto.UserName, cancellationToken);
 
                 if (userFromDb == null)
                 {
@@ -142,19 +142,19 @@ namespace AuthApi.Managers.UserManager
             }
         }
 
-        public async Task<IResult> UpdateAccount(UserAccountUpdateDto userDto)
+        public async Task<IResult> UpdateAccount(UserAccountUpdateDto userDto, CancellationToken cancellationToken)
         {
             try
             {
                 var userId = _userAccessor.UserId;
-                var userFromDb = await _userAccountsRepository.GetUser(userId);
+                var userFromDb = await _userAccountsRepository.GetUser(userId , cancellationToken);
 
                 if(userFromDb == null || userFromDb.IsActive == false)
                 {
                     return Results.Problem("User either does not exist or is inactive!");
                 }
 
-                var checkIfUserNameExists = await _userAccountsRepository.GetUserByName(userDto.UserName);
+                var checkIfUserNameExists = await _userAccountsRepository.GetUserByName(userDto.UserName, cancellationToken);
 
 
                 if(checkIfUserNameExists != null)
@@ -165,7 +165,7 @@ namespace AuthApi.Managers.UserManager
                     }
                 }
 
-                var checkIfEmailExists = await _userAccountsRepository.GetUserByEmail(userDto.Email);
+                var checkIfEmailExists = await _userAccountsRepository.GetUserByEmail(userDto.Email, cancellationToken);
 
                 if(checkIfEmailExists != null)
                 {
@@ -208,14 +208,14 @@ namespace AuthApi.Managers.UserManager
             }
         }
 
-        public async Task<IResult> CheckAuthentication()
+        public async Task<IResult> CheckAuthentication(CancellationToken cancellationToken)
         {
             try
             {
                 var token = _userAccessor.TokenString;
                 var userId =_userAccessor.UserId;
 
-                var user = await _userAccountsRepository.GetUser(userId);
+                var user = await _userAccountsRepository.GetUser(userId, cancellationToken);
 
                 if (token != null && user != null)
                 {
@@ -232,11 +232,11 @@ namespace AuthApi.Managers.UserManager
             }
         }
 
-        public async Task<IResult> GetAccountProperties(string userId)
+        public async Task<IResult> GetAccountProperties(string userId, CancellationToken cancellationToken)
         {
             try
             {
-                var userFromDb = await _userAccountsRepository.GetUser(userId);
+                var userFromDb = await _userAccountsRepository.GetUser(userId, cancellationToken);
 
                 if(userFromDb == null)
                 {
@@ -279,7 +279,7 @@ namespace AuthApi.Managers.UserManager
             }
         }
 
-        public async Task<IResult> LogOut()
+        public async Task<IResult> LogOut(CancellationToken cancellationToken)
         {
             try
             {
@@ -299,13 +299,13 @@ namespace AuthApi.Managers.UserManager
             }
         }
 
-        public async Task<IResult> GetActiveUserList(int itemsToSkip = 0)
+        public async Task<IResult> GetActiveUserList(CancellationToken cancellationToken, int itemsToSkip = 0)
         {
             try
             {
-                var activeUsersCount = await _userAccountsRepository.GetActiveUsersCount() / _pagination;
+                var activeUsersCount = await _userAccountsRepository.GetActiveUsersCount(cancellationToken) / _pagination;
 
-                var result = await _userAccountsRepository.GetTopActiveUsersOrderedAlphabetically(itemsToSkip * _pagination);
+                var result = await _userAccountsRepository.GetTopActiveUsersOrderedAlphabetically(itemsToSkip * _pagination, cancellationToken);
                 List<UserAccountDto> userAccountDtos = new();
                 var userList = _mapper.Map(result, userAccountDtos);
 
@@ -318,7 +318,7 @@ namespace AuthApi.Managers.UserManager
         }
 
         //Implement pagination here as well
-        public async Task<IResult> SearchForUser(string userName)
+        public async Task<IResult> SearchForUser(string userName, CancellationToken cancellationToken)
         {
             try
             {
@@ -326,7 +326,7 @@ namespace AuthApi.Managers.UserManager
 
                 userName = userName.Trim();
 
-                var resutls = await _userAccountsRepository.Search(userName);
+                var resutls = await _userAccountsRepository.Search(userName, cancellationToken);
                 var activeUsersCount = resutls.Count() / _pagination;
 
                 List<UserAccountDto> userAccountDtos = new();
@@ -345,7 +345,7 @@ namespace AuthApi.Managers.UserManager
             }
         }
 
-        public async Task<IResult> PostUserListByIds(IEnumerable<string> Ids)
+        public async Task<IResult> PostUserListByIds(IEnumerable<string> Ids, CancellationToken cancellationToken)
         {
             try
             {
@@ -356,7 +356,7 @@ namespace AuthApi.Managers.UserManager
                     return Results.Problem("The list is empty!");
                 }
 
-                var list = await _userAccountsRepository.SelectUsersFromIdList(Ids);
+                var list = await _userAccountsRepository.SelectUsersFromIdList(Ids, cancellationToken);
 
                 List<UserAccountLightDto> userAccountLightDto = new();
                 var mappedList = _mapper.Map(list, userAccountLightDto);
@@ -373,14 +373,14 @@ namespace AuthApi.Managers.UserManager
             }
         }
 
-        public async Task<IResult> UpdatePassword(NewPasswordDto newPasswordDto)
+        public async Task<IResult> UpdatePassword(NewPasswordDto newPasswordDto, CancellationToken cancellationToken)
         {
             try
             {
                 ArgumentNullException.ThrowIfNull(newPasswordDto);
 
                 var userId = _userAccessor.UserId;
-                var userFromDb = await _userAccountsRepository.GetUser(userId);
+                var userFromDb = await _userAccountsRepository.GetUser(userId, cancellationToken);
 
                 if(userFromDb == null || userFromDb.IsActive == false)
                 {

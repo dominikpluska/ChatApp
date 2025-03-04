@@ -28,17 +28,17 @@ namespace AuthApi.Managers.AdminManager
             _mapper = mapper;
         }
 
-        public async Task<IResult> RegisterNewUser(UserAdminRegistrationDto userDto)
+        public async Task<IResult> RegisterNewUser(UserAdminRegistrationDto userDto, CancellationToken cancellationToken)
         {
             try
             {
-                var checkIfUserNameExists = await _userAccountsRepository.GetUserByName(userDto.UserName);
+                var checkIfUserNameExists = await _userAccountsRepository.GetUserByName(userDto.UserName, cancellationToken);
                 if (checkIfUserNameExists != null)
                 {
                     return Results.Problem("Username already exists! Choose a different user name!");
                 }
 
-                var checkIfEmailExists = await _userAccountsRepository.GetUserByEmail(userDto.Email);
+                var checkIfEmailExists = await _userAccountsRepository.GetUserByEmail(userDto.Email, cancellationToken);
 
                 if (checkIfEmailExists != null)
                 {
@@ -77,11 +77,11 @@ namespace AuthApi.Managers.AdminManager
             }
         }
 
-        public async Task<IResult> ChangeUserPassword(UserAdminPasswordChangeDto userPasswordChangeDto)
+        public async Task<IResult> ChangeUserPassword(UserAdminPasswordChangeDto userPasswordChangeDto, CancellationToken cancellationToken)
         {
             try
             {
-                var userFromDb = await _userAccountsRepository.GetUser(userPasswordChangeDto.UserAccountId);
+                var userFromDb = await _userAccountsRepository.GetUser(userPasswordChangeDto.UserAccountId, cancellationToken);
                 if (userFromDb == null)
                 {
                     return Results.Problem("UserId doesn't exist!");
@@ -108,12 +108,12 @@ namespace AuthApi.Managers.AdminManager
             }
         }
 
-        public async Task<IResult> UpdateUserAccount(UserAdminAccountUpdateDto userDto)
+        public async Task<IResult> UpdateUserAccount(UserAdminAccountUpdateDto userDto, CancellationToken cancellationToken)
         {
             try
             {
-                var userFromDb = await _userAccountsRepository.GetUser(userDto.UserAccountId);
-                var checkIfUserNameExists = await _userAccountsRepository.GetUserByName(userDto.UserName);
+                var userFromDb = await _userAccountsRepository.GetUser(userDto.UserAccountId, cancellationToken);
+                var checkIfUserNameExists = await _userAccountsRepository.GetUserByName(userDto.UserName, cancellationToken);
 
                 if (userFromDb != null)
                 {
@@ -155,7 +155,7 @@ namespace AuthApi.Managers.AdminManager
             }
         }
 
-        public async Task<IResult> DeleteUser(string userId)
+        public async Task<IResult> DeleteUser(string userId, CancellationToken cancellationToken)
         {
             try
             {
@@ -168,11 +168,11 @@ namespace AuthApi.Managers.AdminManager
             }
         }
 
-        public async Task<IResult> GetAllUsers()
+        public async Task<IResult> GetAllUsers(CancellationToken cancellationToken)
         {
             try
             {
-                var resutls = await _userAccountsRepository.GetAllUsers();
+                var resutls = await _userAccountsRepository.GetAllUsers(cancellationToken);
                 return Results.Ok(resutls);
             }
             catch (Exception ex)
@@ -181,11 +181,11 @@ namespace AuthApi.Managers.AdminManager
             }
         }
 
-        public async Task<IResult> GetUser(string userId)
+        public async Task<IResult> GetUser(string userId, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _userAccountsRepository.GetUser(userId);
+                var result = await _userAccountsRepository.GetUser(userId, cancellationToken);
                 return Results.Ok(result);
             }
             catch(Exception ex)
@@ -194,7 +194,7 @@ namespace AuthApi.Managers.AdminManager
             }
         }
 
-        public async Task<IResult> AddNewRole(string roleName)
+        public async Task<IResult> AddNewRole(string roleName, CancellationToken cancellationToken)
         {
             try
             {
@@ -214,7 +214,7 @@ namespace AuthApi.Managers.AdminManager
             }
         }
 
-        public async Task<IResult> UpdateRole(RoleDto roleDto)
+        public async Task<IResult> UpdateRole(RoleDto roleDto, CancellationToken cancellationToken)
         {
             try
             {
@@ -232,7 +232,7 @@ namespace AuthApi.Managers.AdminManager
             }
         }
 
-        public async Task<IResult> DeleteRole(string roleId)
+        public async Task<IResult> DeleteRole(string roleId, CancellationToken cancellationToken)
         {
             try
             {
@@ -245,7 +245,7 @@ namespace AuthApi.Managers.AdminManager
             }
         }
 
-        public async Task<IResult> GetRoles()
+        public async Task<IResult> GetRoles(CancellationToken cancellationToken)
         {
             try
             {
@@ -258,7 +258,7 @@ namespace AuthApi.Managers.AdminManager
             }
         }
 
-        public async Task<IResult> GetRoleById(string roleId)
+        public async Task<IResult> GetRoleById(string roleId, CancellationToken cancellationToken)
         {
             try
             {

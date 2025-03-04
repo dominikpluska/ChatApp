@@ -34,7 +34,7 @@ namespace UserSettingsApi.Managers.BlackListsManager
             _hubContext = hubContext;
         }
 
-        public async Task<IResult> CreateBlackListTable(string userId)
+        public async Task<IResult> CreateBlackListTable(string userId, CancellationToken cancellationToken)
         {
             try
             {
@@ -42,7 +42,7 @@ namespace UserSettingsApi.Managers.BlackListsManager
                 {
                     UserAccountId = userId
                 };
-                await _blackListCommands.CreateBlackList(blackList);
+                await _blackListCommands.CreateBlackList(blackList, cancellationToken);
 
                 return Results.Ok("Black list created!");
             }
@@ -56,7 +56,7 @@ namespace UserSettingsApi.Managers.BlackListsManager
             }
         }
 
-        public async Task<IResult> AddUserToBlackList(string blockedUserId)
+        public async Task<IResult> AddUserToBlackList(string blockedUserId, CancellationToken cancellationToken)
         {
 
             try
@@ -93,23 +93,23 @@ namespace UserSettingsApi.Managers.BlackListsManager
                     return Results.Problem("User is inactive!");
                 }
 
-                var blackListId = await _blackListRepository.GetBlackListId(userProperties.UserAccountId);
-                var isOnList = await _blackListRepository.GetBlockedUser(blackListId, blockedUserId);
+                var blackListId = await _blackListRepository.GetBlackListId(userProperties.UserAccountId, cancellationToken);
+                var isOnList = await _blackListRepository.GetBlockedUser(blackListId, blockedUserId, cancellationToken);
 
                 if(isOnList != null)
                 {
                     return Results.Problem("User is already on the black list!");
                 }
 
-                await _blackListCommands.AddToBlackList(blackListId, blockedUserId);
+                await _blackListCommands.AddToBlackList(blackListId, blockedUserId, cancellationToken);
 
-                var userFriendsListId = await _friendsListRepository.GetFriendsListId(userProperties.UserAccountId);
+                var userFriendsListId = await _friendsListRepository.GetFriendsListId(userProperties.UserAccountId, cancellationToken);
 
-                await _friendListCommands.RemoveFriend(userFriendsListId, blockedUserId);
+                await _friendListCommands.RemoveFriend(userFriendsListId, blockedUserId, cancellationToken);
 
-                var blockedFriendsListId = await _friendsListRepository.GetFriendsListId(blockedUserId);
+                var blockedFriendsListId = await _friendsListRepository.GetFriendsListId(blockedUserId, cancellationToken);
 
-                await _friendListCommands.RemoveFriend(blockedFriendsListId, userProperties.UserAccountId);
+                await _friendListCommands.RemoveFriend(blockedFriendsListId, userProperties.UserAccountId, cancellationToken);
 
                 var userConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(userProperties.UserAccountId);
                 if (userConnectionId != null)
@@ -147,19 +147,19 @@ namespace UserSettingsApi.Managers.BlackListsManager
             }
         }
 
-        public async Task<IResult> GetUserFromBlackList(string userId, string chatterId)
+        public async Task<IResult> GetUserFromBlackList(string userId, string chatterId, CancellationToken cancellationToken)
         {
             try
             {
 
-                var blackListId = await _blackListRepository.GetBlackListId(chatterId);
+                var blackListId = await _blackListRepository.GetBlackListId(chatterId , cancellationToken);
 
                 if(blackListId == null)
                 {
                     return Results.Problem("Black list is empty! Fix this issue!");
                 }
 
-                var checkIfBlocked = await _blackListRepository.GetBlockedUser(blackListId, userId);
+                var checkIfBlocked = await _blackListRepository.GetBlockedUser(blackListId, userId, cancellationToken);
 
                 return Results.Ok(checkIfBlocked);
             }
@@ -177,7 +177,7 @@ namespace UserSettingsApi.Managers.BlackListsManager
             }
         }
 
-        public async Task<IResult> RemoveFromBlackList(string blockedUserId)
+        public async Task<IResult> RemoveFromBlackList(string blockedUserId, CancellationToken cancellationToken)
         {
             try
             {
@@ -203,9 +203,9 @@ namespace UserSettingsApi.Managers.BlackListsManager
                     return Results.Problem("User does not exist!");
                 }
 
-                var blackListId = await _blackListRepository.GetBlackListId(userProperties.UserAccountId);
+                var blackListId = await _blackListRepository.GetBlackListId(userProperties.UserAccountId, cancellationToken);
 
-                await _blackListCommands.RemoveFromBlackList(blackListId, blockedUserId);
+                await _blackListCommands.RemoveFromBlackList(blackListId, blockedUserId, cancellationToken);
 
 
                 var userConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(userProperties.UserAccountId);
@@ -231,7 +231,7 @@ namespace UserSettingsApi.Managers.BlackListsManager
             }
         }
 
-        public async Task<IResult> GetBlackList()
+        public async Task<IResult> GetBlackList(CancellationToken cancellationToken)
         {
             try
             {
@@ -248,7 +248,7 @@ namespace UserSettingsApi.Managers.BlackListsManager
                     return Results.Problem("User is inactive!");
                 }
 
-                var results = await _blackListRepository.GetBlackList(userProperties.UserAccountId);
+                var results = await _blackListRepository.GetBlackList(userProperties.UserAccountId, cancellationToken);
 
                 IdRequestsDto idRequestsDtos = new()
                 {

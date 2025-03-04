@@ -1,6 +1,6 @@
 ﻿
 using AutoMapper;
-using UserSettingsApi.DatabaseOperations.Repository.FriendRequestsRepository;
+using UserSettingsApi.DatabaseOperations.Repository.RequestsRepository;
 using UserSettingsApi.Dto;
 using UserSettingsApi.Models;
 using UserSettingsApi.Services;
@@ -24,7 +24,7 @@ namespace UserSettingsApi.Managers.RequestsManager
             _mapper = mapper;
         }
 
-        public async Task<IResult> GetAllRequests()
+        public async Task<IResult> GetAllRequests(CancellationToken cancellationToken)
         {
             try
             {
@@ -41,7 +41,7 @@ namespace UserSettingsApi.Managers.RequestsManager
                     return Results.Problem("User is inactive!");
                 }
 
-                var results = await _requestsRepository.GetAllRequests(userProperties.UserAccountId);
+                var results = await _requestsRepository.GetAllRequests(userProperties.UserAccountId, cancellationToken);
 
                 if (results.Count() <= 0)
                 {

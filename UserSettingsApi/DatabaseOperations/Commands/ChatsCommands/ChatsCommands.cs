@@ -12,11 +12,11 @@ namespace UserSettingsApi.DatabaseOperations.Commands.ChatsCommands
             _mongoDbService = mongoDbService;
         }
 
-        public async Task<IResult> CreateChatsTable(Chat chat)
+        public async Task<IResult> CreateChatsTable(Chat chat , CancellationToken cancellationToken)
         {
 
            ArgumentNullException.ThrowIfNull(chat);
-           await _mongoDbService.ChatsCollection.InsertOneAsync(chat);
+           await _mongoDbService.ChatsCollection.InsertOneAsync(chat, cancellationToken: cancellationToken);
            return Results.Ok("Chat has been created");
 
         }

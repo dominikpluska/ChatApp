@@ -4,13 +4,12 @@ using MongoDB.Bson;
 using UserSettingsApi.DatabaseOperations.Commands.FriendRequestCommands;
 using UserSettingsApi.DatabaseOperations.Commands.FriendsLisiCommands;
 using UserSettingsApi.DatabaseOperations.Repository.BlackListRepository;
-using UserSettingsApi.DatabaseOperations.Repository.FriendRequestsRepository;
 using UserSettingsApi.DatabaseOperations.Repository.FriendsListRepository;
+using UserSettingsApi.DatabaseOperations.Repository.RequestsRepository;
 using UserSettingsApi.Dto;
 using UserSettingsApi.Models;
 using UserSettingsApi.Services;
 using UserSettingsApi.UserAccessor;
-using UserSettingsApi.UserSettingsHub;
 
 namespace UserSettingsApi.Managers.FriendsListsManager
 {
@@ -40,7 +39,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
             _hubContext = hubContext;
             _mapper = mapper;
         }
-        public async Task<IResult> GetFriendsList()
+        public async Task<IResult> GetFriendsList(CancellationToken cancellationToken)
         {
             try
             {
@@ -57,7 +56,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                     return Results.Problem("User is inactive!");
                 }
 
-                var result = await _friendsListRepository.GetFriendsList(userProperties.UserAccountId);
+                var result = await _friendsListRepository.GetFriendsList(userProperties.UserAccountId, cancellationToken);
 
                 IdRequestsDto idRequestsDtos = new()
                 {
@@ -83,7 +82,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
             }
         }
 
-        public async Task<IResult> SendFriendRequests(string friendId)
+        public async Task<IResult> SendFriendRequests(string friendId, CancellationToken cancellationToken)
         {
             try 
             {
@@ -119,16 +118,16 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                     return Results.Problem("User is inactive!");
                 }
 
-                var blackListIdUser = await _blackListRepository.GetBlackListId(userProperties.UserAccountId);
-                var isOnUserList = await _blackListRepository.GetBlockedUser(blackListIdUser, newFriendProperties.UserAccountId);
+                var blackListIdUser = await _blackListRepository.GetBlackListId(userProperties.UserAccountId, cancellationToken);
+                var isOnUserList = await _blackListRepository.GetBlockedUser(blackListIdUser, newFriendProperties.UserAccountId, cancellationToken);
 
                 if (isOnUserList != null)
                 {
                     return Results.Problem("User is already on the black list! Remove them to continue the operation");
                 }
 
-                var blackListIdFriend = await _blackListRepository.GetBlackListId(newFriendProperties.UserAccountId);
-                var isOnFriendList = await _blackListRepository.GetBlockedUser(blackListIdFriend, userProperties.UserAccountId);
+                var blackListIdFriend = await _blackListRepository.GetBlackListId(newFriendProperties.UserAccountId, cancellationToken);
+                var isOnFriendList = await _blackListRepository.GetBlockedUser(blackListIdFriend, userProperties.UserAccountId, cancellationToken);
 
 
                 if (isOnFriendList != null)
@@ -136,14 +135,14 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                     return Results.Problem("This user is currently blocking you! Operation aborted!");
                 }
 
-                var checkRequest = await _requestsRepository.GetRequest(userProperties.UserAccountId, newFriendProperties.UserAccountId);
+                var checkRequest = await _requestsRepository.GetRequest(userProperties.UserAccountId, newFriendProperties.UserAccountId, cancellationToken);
 
                 if (checkRequest != null)
                 {
                     return Results.Problem("You have already sent a friend request to this user!");
                 }
 
-                var checkRequest2 = await _requestsRepository.GetRequest(newFriendProperties.UserAccountId, userProperties.UserAccountId);
+                var checkRequest2 = await _requestsRepository.GetRequest(newFriendProperties.UserAccountId, userProperties.UserAccountId, cancellationToken);
 
                 if (checkRequest2 != null)
                 {
@@ -157,7 +156,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
                 };
 
-                await _friendRequestCommands.InsertRequests(friendRequest);
+                await _friendRequestCommands.InsertRequests(friendRequest, cancellationToken);
 
 
                 var connectionId = UserSettingsHub.UserSettingsHub.IsConnected(newFriendProperties.UserAccountId);
@@ -187,7 +186,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
             }
         }
 
-        public async Task<IResult> AcceptFriendRequest(string requestId)
+        public async Task<IResult> AcceptFriendRequest(string requestId, CancellationToken cancellationToken)
         {
             try
             {
@@ -210,7 +209,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                     return Results.Problem("User is inactive!");
                 }
 
-                var friendRequest = await _requestsRepository.GetRequest(requestIdParsed);
+                var friendRequest = await _requestsRepository.GetRequest(requestIdParsed, cancellationToken);
 
                 var friendProperties = await _authenticationService.GetAccountProperties(friendRequest.RequestorId);
 
@@ -219,16 +218,16 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                     return Results.Problem("User Id does not match the one saved in the database!");
                 }
 
-                await _friendRequestCommands.AcceptRequest(friendRequest.RequestId);
+                await _friendRequestCommands.AcceptRequest(friendRequest.RequestId, cancellationToken);
 
 
-                var friendListRequestee = await _friendsListRepository.GetFriendsList(userId);
-                await _friendListCommands.AddNewFriend(friendListRequestee.FriendsListId, friendRequest.RequestorId);
+                var friendListRequestee = await _friendsListRepository.GetFriendsList(userId, cancellationToken);
+                await _friendListCommands.AddNewFriend(friendListRequestee.FriendsListId, friendRequest.RequestorId , cancellationToken);
 
-                var friendListRequestor = await _friendsListRepository.GetFriendsList(friendRequest.RequestorId);
-                await _friendListCommands.AddNewFriend(friendListRequestor.FriendsListId, friendRequest.RequesteeId);
+                var friendListRequestor = await _friendsListRepository.GetFriendsList(friendRequest.RequestorId, cancellationToken);
+                await _friendListCommands.AddNewFriend(friendListRequestor.FriendsListId, friendRequest.RequesteeId , cancellationToken);
 
-                await _friendRequestCommands.DeleteRequest(requestIdParsed);
+                await _friendRequestCommands.DeleteRequest(requestIdParsed, cancellationToken);
 
                 var connectionId = UserSettingsHub.UserSettingsHub.IsConnected(friendRequest.RequestorId);
                 if (connectionId != null)
@@ -272,7 +271,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
             }
         }
 
-        public async Task<IResult> RejectFriendRequest(string requestId)
+        public async Task<IResult> RejectFriendRequest(string requestId, CancellationToken cancellationToken)
         {
             try
             {
@@ -293,14 +292,14 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                     return Results.Problem("User is inactive!");
                 }
 
-                var friendRequest = await _requestsRepository.GetRequest(requestIdParsed);
+                var friendRequest = await _requestsRepository.GetRequest(requestIdParsed, cancellationToken);
 
                 if(friendRequest == null)
                 {
                     return Results.Problem("The request is null!");
                 }
 
-                await _friendRequestCommands.DeleteRequest(friendRequest.RequestId);
+                await _friendRequestCommands.DeleteRequest(friendRequest.RequestId, cancellationToken);
 
                 var requestorConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(friendRequest.RequestorId);
 
@@ -328,7 +327,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
             }
         }
 
-        public async Task<IResult> RemoveFriend(string friendId)
+        public async Task<IResult> RemoveFriend(string friendId, CancellationToken cancellationToken)
         {
             try
             {
@@ -352,14 +351,14 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                     return Results.Problem("User does not exist!");
                 }
 
-                var friendsListIdRequestor = await _friendsListRepository.GetFriendsListId(userProperties.UserAccountId);
+                var friendsListIdRequestor = await _friendsListRepository.GetFriendsListId(userProperties.UserAccountId, cancellationToken);
 
-                await _friendListCommands.RemoveFriend(friendsListIdRequestor, friendProperties.UserAccountId);
+                await _friendListCommands.RemoveFriend(friendsListIdRequestor, friendProperties.UserAccountId, cancellationToken);
 
-                var friendsListIdFriend = await _friendsListRepository.GetFriendsListId(friendProperties.UserAccountId);
+                var friendsListIdFriend = await _friendsListRepository.GetFriendsListId(friendProperties.UserAccountId, cancellationToken);
 
 
-                await _friendListCommands.RemoveFriend(friendsListIdFriend, userProperties.UserAccountId);
+                await _friendListCommands.RemoveFriend(friendsListIdFriend, userProperties.UserAccountId, cancellationToken);
 
                 var userConnectionId = UserSettingsHub.UserSettingsHub.IsConnected(userProperties.UserAccountId);
 
@@ -393,7 +392,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
 
         }
 
-        public async Task<IResult> CreateFriendsListTable(string userId)
+        public async Task<IResult> CreateFriendsListTable(string userId, CancellationToken cancellationToken)
         {
             try
             {
@@ -402,7 +401,7 @@ namespace UserSettingsApi.Managers.FriendsListsManager
                     UserAccountId = userId,
                 };
 
-                await _friendListCommands.CreateFriendList(friendsList);
+                await _friendListCommands.CreateFriendList(friendsList, cancellationToken);
                 return Results.Ok("Friends has been table created");
             }
             catch (ArgumentNullException ex)

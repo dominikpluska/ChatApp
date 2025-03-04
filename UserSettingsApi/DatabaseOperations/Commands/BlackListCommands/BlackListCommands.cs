@@ -16,14 +16,14 @@ namespace UserSettingsApi.DatabaseOperations.Commands.BlackListCommands
             _mongoDbService = mongoDbService;
         }
 
-        public async Task<IResult> CreateBlackList(BlackList blackList)
+        public async Task<IResult> CreateBlackList(BlackList blackList, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(blackList);
-            await _mongoDbService.BlackListsCollection.InsertOneAsync(blackList);
+            await _mongoDbService.BlackListsCollection.InsertOneAsync(blackList, cancellationToken: cancellationToken);
             return Results.Ok("Black List has been created");
         }
 
-        public async Task<IResult> AddToBlackList(ObjectId blackListId ,string userId)
+        public async Task<IResult> AddToBlackList(ObjectId blackListId ,string userId, CancellationToken cancellationToken)
         {
 
            ArgumentNullException.ThrowIfNull(userId);
@@ -31,13 +31,13 @@ namespace UserSettingsApi.DatabaseOperations.Commands.BlackListCommands
            var filter = Builders<BlackList>.Filter.Eq(x => x.BlackListId, blackListId);
            var update = Builders<BlackList>.Update.Push(x => x.BlockedAccounts, userId);
 
-           var result = await _mongoDbService.BlackListsCollection.FindOneAndUpdateAsync(filter, update);
+           var result = await _mongoDbService.BlackListsCollection.FindOneAndUpdateAsync(filter, update, cancellationToken: cancellationToken);
 
            return Results.Ok(result);
 
         }
 
-        public async Task<IResult> RemoveFromBlackList(ObjectId blackListId, string userId)
+        public async Task<IResult> RemoveFromBlackList(ObjectId blackListId, string userId, CancellationToken cancellationToken)
         {
 
             ArgumentNullException.ThrowIfNull(userId);
@@ -45,7 +45,7 @@ namespace UserSettingsApi.DatabaseOperations.Commands.BlackListCommands
             var filter = Builders<BsonDocument>.Filter.Eq("_id", blackListId);
             var delete = Builders<BsonDocument>.Update.Pull("BlockedAccounts", userId);
 
-            var result = await _mongoDbService.BlackListsCollectionBson.UpdateOneAsync(filter, delete);
+            var result = await _mongoDbService.BlackListsCollectionBson.UpdateOneAsync(filter, delete, cancellationToken: cancellationToken);
             return Results.Ok(result);
 
         }

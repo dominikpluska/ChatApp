@@ -13,11 +13,11 @@ namespace UserSettingsApi.DatabaseOperations.Repository.ChatsRepository
             _mongoDBService = mongoDBService;
         }
 
-        public async Task<Chat> GetChatList(string userId)
+        public async Task<Chat> GetChatList(string userId, CancellationToken cancellationToken)
         {
 
            var filter = Builders<Chat>.Filter.Eq(x => x.UserId, userId);
-           var chatsList = await _mongoDBService.ChatsCollection.Find(filter).FirstOrDefaultAsync();
+           var chatsList = await _mongoDBService.ChatsCollection.Find(filter).FirstOrDefaultAsync(cancellationToken : cancellationToken);
            return chatsList;
 
         }

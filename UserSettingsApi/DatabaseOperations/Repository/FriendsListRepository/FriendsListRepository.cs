@@ -15,15 +15,15 @@ namespace UserSettingsApi.DatabaseOperations.Repository.FriendsListRepository
             _mongoDBService = mongoDBService;
         }
 
-        public async Task<FriendsList> GetFriendsList(string userId)
+        public async Task<FriendsList> GetFriendsList(string userId, CancellationToken cancellationToken)
         {
 
             var filter = Builders<FriendsList>.Filter.Eq(x => x.UserAccountId, userId);
-            var chatsList = await _mongoDBService.FriendsListCollection.Find(filter).FirstOrDefaultAsync();
+            var chatsList = await _mongoDBService.FriendsListCollection.Find(filter).FirstOrDefaultAsync(cancellationToken: cancellationToken);
             return chatsList;
         }
 
-        public async Task<ObjectId> GetFriendsListId(string userId)
+        public async Task<ObjectId> GetFriendsListId(string userId, CancellationToken cancellationToken)
         {
 
             var filter = Builders<FriendsList>.Filter.Eq(x => x.UserAccountId, userId);
@@ -32,7 +32,7 @@ namespace UserSettingsApi.DatabaseOperations.Repository.FriendsListRepository
                               .Exclude(x => x.Friends)
                               .Exclude(x => x.UserAccountId);
 
-            var result = await _mongoDBService.FriendsListCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
+            var result = await _mongoDBService.FriendsListCollection.Find(filter).Project(projection).FirstOrDefaultAsync(cancellationToken : cancellationToken);
 
             var selectedId = result.GetValue("_id");
             var deserializedResult = BsonSerializer.Deserialize<ObjectId>(selectedId.ToJson());

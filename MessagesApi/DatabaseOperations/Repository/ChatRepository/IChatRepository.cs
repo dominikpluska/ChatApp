@@ -6,10 +6,10 @@ namespace MessagesApi.DatabaseOperations.Repository.ChatRepository
 {
     public interface IChatRepository
     {
-        public Task<IEnumerable<Message>> GetChatMessages(ObjectId chatId);
-        public Task<ObjectId> CheckChat(ObjectId chatId);
-        public Task<string> FindChat(string userId, string chatterId);
-        public Task<Message> GetChatMessage(ObjectId chatId, ObjectId messageId);
-        public Task<IEnumerable<string>> GetChatParticipants(ObjectId chatId);
+        public Task<IEnumerable<Message>> GetChatMessages(ObjectId chatId, CancellationToken cancellationToken);
+        public Task<ObjectId> CheckChat(ObjectId chatId, CancellationToken cancellationToken);
+        public Task<string> FindChat(string userId, string chatterId, CancellationToken cancellationToken);
+        public Task<Message> GetChatMessage(ObjectId chatId, ObjectId messageId, CancellationToken cancellationToken);
+        public Task<IEnumerable<string>> GetChatParticipants(ObjectId chatId, CancellationToken cancellationToken);
     }
 }

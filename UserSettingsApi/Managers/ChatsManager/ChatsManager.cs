@@ -18,12 +18,12 @@ namespace UserSettingsApi.Managers.ChatsManager
             _chatsCommands = chatsCommands;
         }
 
-        public async Task<IResult> GetAllChats()
+        public async Task<IResult> GetAllChats(CancellationToken cancellationToken)
         {
             try
             {
                 var userId = _userAccessor.UserId;
-                var chats = await _chatsRepository.GetChatList(userId);
+                var chats = await _chatsRepository.GetChatList(userId, cancellationToken);
                 return Results.Ok(chats.ChatList);
             }
             catch (ArgumentNullException ex)
@@ -40,7 +40,7 @@ namespace UserSettingsApi.Managers.ChatsManager
             }
         }
 
-        public async Task<IResult> CreateChatsTable(string userId)
+        public async Task<IResult> CreateChatsTable(string userId, CancellationToken cancellationToken)
         {
             try
             {
@@ -49,7 +49,7 @@ namespace UserSettingsApi.Managers.ChatsManager
                     UserId = userId,
                 };
 
-                await _chatsCommands.CreateChatsTable(chat);
+                await _chatsCommands.CreateChatsTable(chat, cancellationToken);
                 return Results.Ok("Chats table created");
             }
             catch (ArgumentNullException ex)
